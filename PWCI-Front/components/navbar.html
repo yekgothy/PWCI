@@ -17,9 +17,18 @@
     
     <!-- Right Side Actions -->
     <div class="w-48 flex justify-end">
-      <div class="flex items-center space-x-3">
+      <!-- Mostrar cuando NO está autenticado -->
+      <div id="authButtons" class="flex items-center space-x-3">
         <a href="../pages/login.html" class="px-3 py-2 border border-gray-500 text-white hover:bg-gray-800 transition-colors rounded text-sm font-medium">LOGIN</a>
         <a href="../pages/signup.html" class="px-3 py-2 bg-white text-black hover:bg-gray-100 transition-colors rounded text-sm font-medium">SIGN UP</a>
+      </div>
+      
+      <!-- Mostrar cuando SÍ está autenticado -->
+      <div id="userMenu" class="hidden flex items-center space-x-3">
+        <span id="navUserName" class="text-white text-sm font-medium"></span>
+        <button id="logoutButton" class="px-3 py-2 bg-red-600 text-white hover:bg-red-700 transition-colors rounded text-sm font-medium">
+          Cerrar Sesión
+        </button>
       </div>
     </div>
   </div>

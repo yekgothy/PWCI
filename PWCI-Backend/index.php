@@ -1,10 +1,5 @@
 <?php
-/**
- * Página de índice para la API BDM
- * 
- * Esta página proporciona información general sobre la API
- * y enlaces útiles para el desarrollo
- */
+
 ?>
 <!DOCTYPE html>
 <html lang="es">

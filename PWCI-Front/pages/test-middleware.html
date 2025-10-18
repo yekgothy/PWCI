@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Ejemplo de Uso - API Middleware</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-900 text-white p-8">
+    
+        
+        <!-- Estado de Sesión -->
+        <div class="bg-gray-800 p-6 rounded-lg">
+            <h2 class="text-2xl font-semibold mb-4">Estado de Sesión</h2>
+            <div id="sessionStatus"></div>
+            <button onclick="showSession()" class="mt-4 px-6 py-2 bg-gray-600 hover:bg-gray-700 rounded">Actualizar</button>
+            <button onclick="AuthAPI.logout()" class="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 rounded ml-2">Cerrar Sesión</button>
+        </div>
+    </div>
+    
+    <!-- Cargar el cliente API -->
+    <script src="../controllers/api-client.js"></script>
+    
+    <script>
+        // Mostrar estado de sesión al cargar
+        window.addEventListener('DOMContentLoaded', showSession);
+        
+        
+        
+        // Mostrar estado de sesión
+        function showSession() {
+            const token = localStorage.getItem('authToken');
+            const userData = localStorage.getItem('userData');
+            const loginTime = localStorage.getItem('loginTime');
+            
+            const isAuth = token !== null;
+            const user = userData ? JSON.parse(userData) : null;
+            
+            const statusDiv = document.getElementById('sessionStatus');
+            statusDiv.innerHTML = `
+                <div class="space-y-2 text-sm">
+                    <p><strong>Autenticado:</strong> ${isAuth ? '✅ Sí' : '❌ No'}</p>
+                    ${user ? `
+                        <p><strong>Usuario:</strong> ${user.nombreCompleto}</p>
+                        <p><strong>Email:</strong> ${user.correoElectronico}</p>
+                        <p><strong>Rol:</strong> ${user.rol}</p>
+                        <p><strong>ID:</strong> ${user.idUsuario}</p>
+                    ` : ''}
+                    <p><strong>Token:</strong> ${token ? token.substring(0, 20) + '...' : 'Ninguno'}</p>
+                    ${loginTime ? `<p><strong>Login:</strong> ${new Date(loginTime).toLocaleString()}</p>` : ''}
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>

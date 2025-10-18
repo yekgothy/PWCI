@@ -26,13 +26,21 @@
 
     <div class="mt-auto border-t border-zinc-800 pt-6">
         <a href="../pages/profileDetails.html" class="flex items-center p-3 rounded-lg hover:bg-zinc-800 transition-colors cursor-pointer">
-            <div class="w-10 h-10 bg-zinc-700 rounded-full"></div>
+            <div class="w-10 h-10 bg-zinc-700 rounded-full flex items-center justify-center">
+                <span id="sidebarUserInitials" class="text-white font-semibold text-lg"></span>
+            </div>
             <div class="ml-3">
-                <p class="font-semibold text-white text-sm">Mi Perfil</p>
+                <p id="sidebarUserName" class="font-semibold text-white text-sm">Mi Perfil</p>
                 <p class="text-xs text-zinc-400">Ver perfil completo</p>
             </div>
         </a>
+        
+        <!-- Botón de Cerrar Sesión -->
+        <button id="sidebarLogoutButton" class="w-full mt-3 p-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium text-sm transition-colors flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+            </svg>
+            Cerrar Sesión
+        </button>
     </div>
 </div>
-
-3
