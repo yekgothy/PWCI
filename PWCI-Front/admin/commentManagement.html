@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Comentarios - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-neutral-50 text-neutral-900 font-sans">
+
+    <!-- NAVBAR COMPONENT -->
+    <div id="navbar"></div>
+
+    <!-- MAIN CONTENT -->
+    <div class="min-h-screen pt-16">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            
+            <!-- Header -->
+            <div class="mb-8 flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-neutral-900 mb-2">Gestión de Comentarios</h1>
+                    <p class="text-neutral-600">Moderar comentarios y mantener un ambiente positivo</p>
+                </div>
+                <a href="adminPanel.html" class="bg-neutral-200 hover:bg-neutral-300 text-neutral-700 px-4 py-2 rounded-lg transition-colors">
+                    ← Volver al Panel
+                </a>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-md border border-neutral-200">
+                    <h3 class="text-lg font-semibold text-neutral-900 mb-1">Total Comentarios</h3>
+                    <p class="text-3xl font-bold text-blue-600">248</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-neutral-200">
+                    <h3 class="text-lg font-semibold text-neutral-900 mb-1">Reportados</h3>
+                    <p class="text-3xl font-bold text-red-600">7</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-neutral-200">
+                    <h3 class="text-lg font-semibold text-neutral-900 mb-1">Hoy</h3>
+                    <p class="text-3xl font-bold text-green-600">23</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-neutral-200">
+                    <h3 class="text-lg font-semibold text-neutral-900 mb-1">Eliminados</h3>
+                    <p class="text-3xl font-bold text-neutral-600">15</p>
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="mb-6">
+                <div class="border-b border-neutral-200">
+                    <nav class="flex space-x-8">
+                        <button class="py-2 px-1 border-b-2 border-red-500 text-red-600 font-medium">
+                            Reportados (7)
+                        </button>
+                        <button class="py-2 px-1 border-b-2 border-transparent text-neutral-500 hover:text-neutral-700">
+                            Recientes (23)
+                        </button>
+                        <button class="py-2 px-1 border-b-2 border-transparent text-neutral-500 hover:text-neutral-700">
+                            Todos (248)
+                        </button>
+                        <button class="py-2 px-1 border-b-2 border-transparent text-neutral-500 hover:text-neutral-700">
+                            Eliminados (15)
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Search and Filters -->
+            <div class="bg-white p-4 rounded-xl shadow-md border border-neutral-200 mb-6">
+                <div class="flex flex-col md:flex-row gap-4">
+                    <div class="flex-1">
+                        <input type="text" placeholder="Buscar comentarios..." class="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    <div class="flex gap-2">
+                        <select class="border border-neutral-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option>Todos los posts</option>
+                            <option>Post específico</option>
+                        </select>
+                        <select class="border border-neutral-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option>Último mes</option>
+                            <option>Última semana</option>
+                            <option>Hoy</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Comments List -->
+            <div class="space-y-4">
+                
+                <!-- Reported Comment 1 -->
+                <div class="bg-white rounded-xl shadow-md border border-red-200 p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-neutral-200 rounded-full"></div>
+                            <div>
+                                <h4 class="font-semibold text-neutral-900">futbol_lover89</h4>
+                                <p class="text-sm text-neutral-500">Hace 2 horas en: "¿Argentina favorito para 2026?"</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">3 reportes</span>
+                            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Spam</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4 p-3 bg-neutral-50 rounded-lg border-l-4 border-red-400">
+                        <p class="text-neutral-700">Este comentario contiene lenguaje inapropiado y ataques personales hacia otros usuarios. No aporta valor a la discusión.</p>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-neutral-200">
+                        <div class="flex items-center space-x-4 text-sm text-neutral-500">
+                            <span>5 respuestas</span>
+                            <span>•</span>
+                            <span>Reportado por: user123, fanatic_2026, mundial_news</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-3 py-1 rounded text-sm transition-colors">
+                                Ver Contexto
+                            </button>
+                            <button class="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-1 rounded text-sm transition-colors">
+                                Advertir Usuario
+                            </button>
+                            <button class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded text-sm transition-colors">
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reported Comment 2 -->
+                <div class="bg-white rounded-xl shadow-md border border-red-200 p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-neutral-200 rounded-full"></div>
+                            <div>
+                                <h4 class="font-semibold text-neutral-900">troll_master</h4>
+                                <p class="text-sm text-neutral-500">Hace 4 horas en: "Mejores goles del mundial"</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">5 reportes</span>
+                            <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Hate Speech</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4 p-3 bg-neutral-50 rounded-lg border-l-4 border-red-400">
+                        <p class="text-neutral-700">Comentario con contenido discriminatorio y ofensivo. Viola las políticas de comunidad.</p>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-neutral-200">
+                        <div class="flex items-center space-x-4 text-sm text-neutral-500">
+                            <span>12 respuestas</span>
+                            <span>•</span>
+                            <span>Usuario con historial de infracciones</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-3 py-1 rounded text-sm transition-colors">
+                                Ver Perfil
+                            </button>
+                            <button class="bg-orange-100 hover:bg-orange-200 text-orange-700 px-3 py-1 rounded text-sm transition-colors">
+                                Suspender Usuario
+                            </button>
+                            <button class="bg-red-100 hover:bg-red-200 text-red-700 px-3 py-1 rounded text-sm transition-colors">
+                                Eliminar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Normal Comment -->
+                <div class="bg-white rounded-xl shadow-md border border-neutral-200 p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-neutral-200 rounded-full"></div>
+                            <div>
+                                <h4 class="font-semibold text-neutral-900">soccer_analyst</h4>
+                                <p class="text-sm text-neutral-500">Hace 1 hora en: "Análisis táctico: 4-3-3"</p>
+                            </div>
+                        </div>
+                        <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Sin reportes</span>
+                    </div>
+                    
+                    <div class="mb-4 p-3 bg-neutral-50 rounded-lg">
+                        <p class="text-neutral-700">Excelente análisis. Creo que el 4-3-3 funciona especialmente bien con mediocampistas técnicos que pueden crear juego. ¿Has considerado cómo se adapta en partidos de alta presión?</p>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-neutral-200">
+                        <div class="flex items-center space-x-4 text-sm text-neutral-500">
+                            <span>3 respuestas</span>
+                            <span>•</span>
+                            <span>8 me gusta</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="bg-green-100 hover:bg-green-200 text-green-700 px-3 py-1 rounded text-sm transition-colors">
+                                Destacar
+                            </button>
+                            <button class="bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-3 py-1 rounded text-sm transition-colors">
+                                Ver Contexto
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Another Reported Comment -->
+                <div class="bg-white rounded-xl shadow-md border border-yellow-200 p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-neutral-200 rounded-full"></div>
+                            <div>
+                                <h4 class="font-semibold text-neutral-900">casual_fan</h4>
+                                <p class="text-sm text-neutral-500">Hace 3 horas en: "Clasificados Mundial 2026"</p>
+                            </div>
+                        </div>
+                        <div class="flex items-center space-x-2">
+                            <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">1 reporte</span>
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Off-topic</span>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-4 p-3 bg-neutral-50 rounded-lg border-l-4 border-yellow-400">
+                        <p class="text-neutral-700">¿Alguien sabe dónde puedo comprar camisetas baratas? No relacionado con el tema pero necesito ayuda urgente.</p>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-neutral-200">
+                        <div class="flex items-center space-x-4 text-sm text-neutral-500">
+                            <span>1 respuesta</span>
+                            <span>•</span>
+                            <span>Reporte menor</span>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="bg-blue-100 hover:bg-blue-200 text-blue-700 px-3 py-1 rounded text-sm transition-colors">
+                                Mover a Off-Topic
+                            </button>
+                            <button class="bg-yellow-100 hover:bg-yellow-200 text-yellow-700 px-3 py-1 rounded text-sm transition-colors">
+                                Editar
+                            </button>
+                            <button class="bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-3 py-1 rounded text-sm transition-colors">
+                                Aprobar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-8 flex items-center justify-between">
+                <p class="text-sm text-neutral-500">
+                    Mostrando 4 de 7 comentarios reportados
+                </p>
+                <div class="flex space-x-2">
+                    <button class="bg-white border border-neutral-300 text-neutral-500 px-3 py-2 rounded-lg">
+                        Anterior
+                    </button>
+                    <button class="bg-blue-500 text-white px-3 py-2 rounded-lg">1</button>
+                    <button class="bg-white border border-neutral-300 text-neutral-700 px-3 py-2 rounded-lg">2</button>
+                    <button class="bg-white border border-neutral-300 text-neutral-700 px-3 py-2 rounded-lg">
+                        Siguiente
+                    </button>
+                </div>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="mt-6 bg-neutral-100 p-4 rounded-xl">
+                <div class="flex items-center justify-between">
+                    <div class="flex items-center space-x-4">
+                        <input type="checkbox" class="rounded border-neutral-300">
+                        <span class="text-sm text-neutral-600">Seleccionar todos los comentarios reportados</span>
+                    </div>
+                    <div class="flex space-x-2">
+                        <button class="bg-yellow-500 hover:bg-yellow-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
+                            Advertir Usuarios
+                        </button>
+                        <button class="bg-red-500 hover:bg-red-600 text-white px-4 py-2 rounded-lg transition-colors text-sm">
+                            Eliminar Seleccionados
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Cargar navbar
+        fetch('../components/navbar.html?v=2')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('navbar').innerHTML = data;
+                // Inicializar navbar
+                setTimeout(() => {
+                    const menuButton = document.getElementById('menuButton');
+                    const sidebarMenu = document.getElementById('sidebarMenu');
+                    const closeMenuButton = document.getElementById('closeMenuButton');
+                    const menuOverlay = document.getElementById('menuOverlay');
+
+                    if (menuButton && sidebarMenu) {
+                        menuButton.addEventListener('click', function() {
+                            sidebarMenu.classList.remove('hidden');
+                        });
+                        if (closeMenuButton) {
+                            closeMenuButton.addEventListener('click', function() {
+                                sidebarMenu.classList.add('hidden');
+                            });
+                        }
+                        if (menuOverlay) {
+                            menuOverlay.addEventListener('click', function() {
+                                sidebarMenu.classList.add('hidden');
+                            });
+                        }
+                    }
+                }, 100);
+            })
+            .catch(error => console.error('Error cargando navbar:', error));
+    </script>
+
+</body>
+</html>

@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aprobación de Posts - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-neutral-50 text-neutral-900 font-sans">
+
+    <!-- NAVBAR COMPONENT -->
+    <div id="navbar"></div>
+
+    <!-- MAIN CONTENT -->
+    <div class="min-h-screen pt-16">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            
+            <!-- Header -->
+            <div class="mb-8 flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-neutral-900 mb-2">Aprobación de Publicaciones</h1>
+                    <p class="text-neutral-600">Revisa y modera las publicaciones pendientes</p>
+                </div>
+                <a href="adminPanel.html" class="bg-neutral-200 hover:bg-neutral-300 text-neutral-700 px-4 py-2 rounded-lg transition-colors">
+                    ← Volver al Panel
+                </a>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="mb-6">
+                <div class="border-b border-neutral-200">
+                    <nav class="flex space-x-8">
+                        <button class="py-2 px-1 border-b-2 border-blue-500 text-blue-600 font-medium">
+                            Pendientes (12)
+                        </button>
+                        <button class="py-2 px-1 border-b-2 border-transparent text-neutral-500 hover:text-neutral-700">
+                            Aprobados (48)
+                        </button>
+                        <button class="py-2 px-1 border-b-2 border-transparent text-neutral-500 hover:text-neutral-700">
+                            Rechazados (6)
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Posts List -->
+            <div class="space-y-6">
+                
+                <!-- Post 1 -->
+                <div class="bg-white rounded-xl shadow-md border border-neutral-200 p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-neutral-200 rounded-full"></div>
+                            <div>
+                                <h3 class="font-semibold text-neutral-900">usuario_futbol23</h3>
+                                <p class="text-sm text-neutral-500">Hace 2 horas</p>
+                            </div>
+                        </div>
+                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Pendiente</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-neutral-700 mb-3">¿Alguien más piensa que Argentina tiene el mejor equipo para Qatar 2026? 🇦🇷⚽</p>
+                        <div class="w-full h-48 bg-neutral-100 rounded-lg bg-cover bg-center" style="background-image: url('../public/cardEjemplo1.jpg')"></div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-neutral-200">
+                        <div class="flex items-center space-x-4 text-sm text-neutral-500">
+                            <span>Categoría: Selecciones</span>
+                            <span>•</span>
+                            <span>3 reportes</span>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg transition-colors">
+                                Rechazar
+                            </button>
+                            <button class="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg transition-colors">
+                                Aprobar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Post 2 -->
+                <div class="bg-white rounded-xl shadow-md border border-neutral-200 p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-neutral-200 rounded-full"></div>
+                            <div>
+                                <h3 class="font-semibold text-neutral-900">fan_mundial_2026</h3>
+                                <p class="text-sm text-neutral-500">Hace 4 horas</p>
+                            </div>
+                        </div>
+                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Pendiente</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-neutral-700 mb-3">Estadísticas increíbles del último mundial. ¿Cuál fue tu momento favorito?</p>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-neutral-200">
+                        <div class="flex items-center space-x-4 text-sm text-neutral-500">
+                            <span>Categoría: Estadísticas</span>
+                            <span>•</span>
+                            <span>0 reportes</span>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg transition-colors">
+                                Rechazar
+                            </button>
+                            <button class="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg transition-colors">
+                                Aprobar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Post 3 -->
+                <div class="bg-white rounded-xl shadow-md border border-neutral-200 p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-neutral-200 rounded-full"></div>
+                            <div>
+                                <h3 class="font-semibold text-neutral-900">goal_hunter</h3>
+                                <p class="text-sm text-neutral-500">Hace 6 horas</p>
+                            </div>
+                        </div>
+                        <span class="bg-red-100 text-red-800 text-xs px-2 py-1 rounded-full">Reportado</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-neutral-700 mb-3">Los mejores goles de la historia de los mundiales. ¡Épico! 🔥⚽</p>
+                        <div class="w-full h-48 bg-neutral-100 rounded-lg bg-cover bg-center" style="background-image: url('../public/cardEjemplo2.jpg')"></div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-neutral-200">
+                        <div class="flex items-center space-x-4 text-sm text-neutral-500">
+                            <span>Categoría: Historia</span>
+                            <span>•</span>
+                            <span class="text-red-600 font-medium">8 reportes</span>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button class="bg-neutral-100 hover:bg-neutral-200 text-neutral-700 px-4 py-2 rounded-lg transition-colors">
+                                Ver Reportes
+                            </button>
+                            <button class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg transition-colors">
+                                Rechazar
+                            </button>
+                            <button class="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg transition-colors">
+                                Aprobar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Post 4 -->
+                <div class="bg-white rounded-xl shadow-md border border-neutral-200 p-6">
+                    <div class="flex items-start justify-between mb-4">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 bg-neutral-200 rounded-full"></div>
+                            <div>
+                                <h3 class="font-semibold text-neutral-900">tactics_master</h3>
+                                <p class="text-sm text-neutral-500">Hace 8 horas</p>
+                            </div>
+                        </div>
+                        <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Pendiente</span>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <p class="text-neutral-700 mb-3">Análisis táctico: Por qué el 4-3-3 sigue siendo la formación dominante</p>
+                        <div class="w-full h-48 bg-neutral-100 rounded-lg bg-cover bg-center" style="background-image: url('../public/cardEjemplo3.jpg')"></div>
+                    </div>
+
+                    <div class="flex items-center justify-between pt-4 border-t border-neutral-200">
+                        <div class="flex items-center space-x-4 text-sm text-neutral-500">
+                            <span>Categoría: Táctica</span>
+                            <span>•</span>
+                            <span>1 reporte</span>
+                        </div>
+                        <div class="flex space-x-3">
+                            <button class="bg-red-100 hover:bg-red-200 text-red-700 px-4 py-2 rounded-lg transition-colors">
+                                Rechazar
+                            </button>
+                            <button class="bg-green-100 hover:bg-green-200 text-green-700 px-4 py-2 rounded-lg transition-colors">
+                                Aprobar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
+
+            <!-- Pagination -->
+            <div class="mt-8 flex items-center justify-between">
+                <p class="text-sm text-neutral-500">
+                    Mostrando 4 de 12 publicaciones pendientes
+                </p>
+                <div class="flex space-x-2">
+                    <button class="bg-white border border-neutral-300 text-neutral-500 px-3 py-2 rounded-lg">
+                        Anterior
+                    </button>
+                    <button class="bg-blue-500 text-white px-3 py-2 rounded-lg">1</button>
+                    <button class="bg-white border border-neutral-300 text-neutral-700 px-3 py-2 rounded-lg">2</button>
+                    <button class="bg-white border border-neutral-300 text-neutral-700 px-3 py-2 rounded-lg">3</button>
+                    <button class="bg-white border border-neutral-300 text-neutral-700 px-3 py-2 rounded-lg">
+                        Siguiente
+                    </button>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript para cargar navbar -->
+    <script>
+        // Cargar navbar
+        fetch('../components/navbar.html?v=2')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('navbar').innerHTML = data;
+                // Inicializar navbar
+                setTimeout(() => {
+                    const menuButton = document.getElementById('menuButton');
+                    const sidebarMenu = document.getElementById('sidebarMenu');
+                    const closeMenuButton = document.getElementById('closeMenuButton');
+                    const menuOverlay = document.getElementById('menuOverlay');
+
+                    if (menuButton && sidebarMenu) {
+                        menuButton.addEventListener('click', function() {
+                            sidebarMenu.classList.remove('hidden');
+                        });
+                        if (closeMenuButton) {
+                            closeMenuButton.addEventListener('click', function() {
+                                sidebarMenu.classList.add('hidden');
+                            });
+                        }
+                        if (menuOverlay) {
+                            menuOverlay.addEventListener('click', function() {
+                                sidebarMenu.classList.add('hidden');
+                            });
+                        }
+                    }
+                }, 100);
+            })
+            .catch(error => console.error('Error cargando navbar:', error));
+    </script>
+
+</body>
+</html>

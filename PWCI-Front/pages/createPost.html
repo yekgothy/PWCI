@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Crear Post - World Cup Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-neutral-50 text-neutral-900 font-sans min-h-screen" style="background-image: url('../public/bgFeed.png'); background-size: cover; background-position: center; background-attachment: fixed;">
+
+    <!-- NAVBAR COMPONENT -->
+    <div id="navbar"></div>
+
+    <!-- MAIN CONTENT -->
+    <main class="min-h-screen pt-16">
+        <div class="flex max-w-7xl mx-auto">
+            
+            <!-- LEFT SIDEBAR -->
+            <div class="w-72 fixed left-0 top-16 h-[calc(100vh-4rem)] overflow-y-auto" id="sidebarFeed1"></div>
+            
+            <!-- CENTER CONTENT -->
+            <div class="flex-1 ml-72 mr-72 px-6 py-8">
+                <div class="max-w-2xl mx-auto">
+                    
+                    <!-- Header -->
+                    <div class="mb-8">
+                        <h1 class="text-3xl font-bold text-neutral-900 mb-2">Crear Nueva Publicación</h1>
+                        <p class="text-neutral-600">Comparte tu pasión por el fútbol con la comunidad</p>
+                    </div>
+
+                    <!-- Create Post Form -->
+                    <div class="bg-white rounded-xl shadow-lg border border-neutral-200 p-6">
+                        <form class="space-y-6">
+                            
+                            <!-- Post Type Selection -->
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-3">Tipo de publicación</label>
+                                <div class="grid grid-cols-3 gap-3">
+                                    <label class="flex items-center justify-center p-4 border-2 border-neutral-200 rounded-lg cursor-pointer hover:border-neutral-300 transition-colors">
+                                        <input type="radio" name="postType" value="discussion" class="sr-only" checked>
+                                        <div class="text-center">
+                                            <div class="w-8 h-8 mx-auto mb-2 bg-blue-100 rounded-full flex items-center justify-center">
+                                                <svg class="w-4 h-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                                                </svg>
+                                            </div>
+                                            <span class="text-xs font-medium text-neutral-700">Discusión</span>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center justify-center p-4 border-2 border-neutral-200 rounded-lg cursor-pointer hover:border-neutral-300 transition-colors">
+                                        <input type="radio" name="postType" value="news" class="sr-only">
+                                        <div class="text-center">
+                                            <div class="w-8 h-8 mx-auto mb-2 bg-green-100 rounded-full flex items-center justify-center">
+                                                <svg class="w-4 h-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2 2 0 00-2-2h-2m-4-3H9M7 16h6M7 8h6v4H7V8z"></path>
+                                                </svg>
+                                            </div>
+                                            <span class="text-xs font-medium text-neutral-700">Noticia</span>
+                                        </div>
+                                    </label>
+                                    <label class="flex items-center justify-center p-4 border-2 border-neutral-200 rounded-lg cursor-pointer hover:border-neutral-300 transition-colors">
+                                        <input type="radio" name="postType" value="prediction" class="sr-only">
+                                        <div class="text-center">
+                                            <div class="w-8 h-8 mx-auto mb-2 bg-yellow-100 rounded-full flex items-center justify-center">
+                                                <svg class="w-4 h-4 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                                                </svg>
+                                            </div>
+                                            <span class="text-xs font-medium text-neutral-700">Predicción</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Post Title -->
+                            <div>
+                                <label for="title" class="block text-sm font-medium text-neutral-700 mb-2">Título de la publicación *</label>
+                                <input 
+                                    type="text" 
+                                    id="title" 
+                                    name="title" 
+                                    class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500" 
+                                    placeholder="¿Qué quieres compartir sobre el Mundial?"
+                                    required
+                                >
+                            </div>
+
+                            <!-- Category Selection -->
+                            <div>
+                                <label for="category" class="block text-sm font-medium text-neutral-700 mb-2">Categoría *</label>
+                                <select id="category" name="category" class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500" required>
+                                    <option value="">Selecciona una categoría</option>
+                                    <option value="general">Discusión General</option>
+                                    <option value="teams">Equipos y Jugadores</option>
+                                    <option value="predictions">Predicciones</option>
+                                    <option value="news">Noticias</option>
+                                    <option value="history">Historia del Mundial</option>
+                                </select>
+                            </div>
+
+                            <!-- Post Content -->
+                            <div>
+                                <label for="content" class="block text-sm font-medium text-neutral-700 mb-2">Contenido *</label>
+                                <textarea 
+                                    id="content" 
+                                    name="content" 
+                                    rows="8" 
+                                    class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500 resize-none" 
+                                    placeholder="Escribe tu publicación aquí..."
+                                    required
+                                ></textarea>
+                                <p class="text-xs text-neutral-500 mt-2">Máximo 2000 caracteres</p>
+                            </div>
+
+                            <!-- Image Upload -->
+                            <div>
+                                <label class="block text-sm font-medium text-neutral-700 mb-2">Agregar imagen (opcional)</label>
+                                <div class="border-2 border-dashed border-neutral-300 rounded-lg p-6 text-center hover:border-neutral-400 transition-colors cursor-pointer">
+                                    <svg class="mx-auto h-12 w-12 text-neutral-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                                    </svg>
+                                    <div class="mt-4">
+                                        <p class="text-neutral-600">Haz clic para subir una imagen</p>
+                                        <p class="text-xs text-neutral-500 mt-1">PNG, JPG hasta 10MB</p>
+                                    </div>
+                                    <input type="file" class="hidden" accept="image/*">
+                                </div>
+                            </div>
+
+                            <!-- Tags -->
+                            <div>
+                                <label for="tags" class="block text-sm font-medium text-neutral-700 mb-2">Tags (opcional)</label>
+                                <input 
+                                    type="text" 
+                                    id="tags" 
+                                    name="tags" 
+                                    class="w-full px-4 py-3 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500 focus:border-neutral-500" 
+                                    placeholder="mundial2026, argentina, brasil..."
+                                >
+                                <p class="text-xs text-neutral-500 mt-2">Separa los tags con comas</p>
+                            </div>
+
+                            <!-- Action Buttons -->
+                            <div class="flex gap-4 pt-4">
+                                <a href="feed.html" class="flex-1 px-6 py-3 border border-neutral-300 text-neutral-700 rounded-lg hover:bg-neutral-50 transition-colors text-center">
+                                    Cancelar
+                                </a>
+                                <a href="feed.html" class="flex-1 px-6 py-3 bg-neutral-900 text-white rounded-lg hover:bg-neutral-800 transition-colors text-center">
+                                    Publicar
+                                </a>
+                            </div>
+
+                        </form>
+                    </div>
+
+                </div>
+            </div>
+            
+            <!-- RIGHT SIDEBAR -->
+            <div class="w-72 fixed right-0 top-16 h-[calc(100vh-4rem)] overflow-y-auto" id="sidebarFeed2"></div>
+
+        </div>
+    </main>
+
+    <!-- Scripts -->
+    <script>
+        // Load components
+        Promise.all([
+            fetch('../components/navbar.html').then(response => response.text()),
+            fetch('../components/sidebarFeed1.html').then(response => response.text()),
+            fetch('../components/sidebarFeed2.html').then(response => response.text())
+        ]).then(([navbarHTML, sidebar1HTML, sidebar2HTML]) => {
+            document.getElementById('navbar').innerHTML = navbarHTML;
+            document.getElementById('sidebarFeed1').innerHTML = sidebar1HTML;
+            document.getElementById('sidebarFeed2').innerHTML = sidebar2HTML;
+            
+            // Initialize navbar functionality
+            initializeNavbar();
+            initCountdown();
+        });
+
+        function initializeNavbar() {
+            const menuButton = document.getElementById('menuButton');
+            const sidebarMenu = document.getElementById('sidebarMenu');
+            const closeMenuButton = document.getElementById('closeMenuButton');
+            const menuOverlay = document.getElementById('menuOverlay');
+
+            if (menuButton && sidebarMenu) {
+                menuButton.addEventListener('click', () => {
+                    sidebarMenu.classList.remove('hidden');
+                });
+
+                if (closeMenuButton) {
+                    closeMenuButton.addEventListener('click', () => {
+                        sidebarMenu.classList.add('hidden');
+                    });
+                }
+
+                if (menuOverlay) {
+                    menuOverlay.addEventListener('click', () => {
+                        sidebarMenu.classList.add('hidden');
+                    });
+                }
+            }
+        }
+
+        function initCountdown() {
+            const targetDate = new Date('2026-06-11T00:00:00Z').getTime();
+
+            function updateCountdown() {
+                const now = new Date().getTime();
+                const distance = targetDate - now;
+
+                if (distance > 0) {
+                    const days = Math.floor(distance / (1000 * 60 * 60 * 24));
+                    const hours = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+                    const minutes = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+                    const seconds = Math.floor((distance % (1000 * 60)) / 1000);
+
+                    const daysElement = document.getElementById('days');
+                    const hoursElement = document.getElementById('hours');
+                    const minutesElement = document.getElementById('minutes');
+                    const secondsElement = document.getElementById('seconds');
+
+                    if (daysElement) daysElement.textContent = days;
+                    if (hoursElement) hoursElement.textContent = hours;
+                    if (minutesElement) minutesElement.textContent = minutes;
+                    if (secondsElement) secondsElement.textContent = seconds;
+                }
+            }
+
+            updateCountdown();
+            setInterval(updateCountdown, 1000);
+        }
+
+        // Character counter for content textarea
+        document.addEventListener('DOMContentLoaded', function() {
+            const textarea = document.getElementById('content');
+            const maxLength = 2000;
+            
+            if (textarea) {
+                textarea.addEventListener('input', function() {
+                    const remaining = maxLength - this.value.length;
+                    const counter = this.parentElement.querySelector('.text-xs');
+                    if (counter) {
+                        counter.textContent = `${remaining} caracteres restantes`;
+                        if (remaining < 100) {
+                            counter.classList.add('text-red-500');
+                        } else {
+                            counter.classList.remove('text-red-500');
+                        }
+                    }
+                });
+            }
+        });
+    </script>
+
+</body>
+</html>

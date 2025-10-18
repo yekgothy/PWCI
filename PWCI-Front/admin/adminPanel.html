@@ -1,0 +1,209 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Panel de Administración - World Cup Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-neutral-50 text-neutral-900 font-sans">
+
+    <!-- NAVBAR COMPONENT -->
+    <div id="navbar"></div>
+
+    <!-- MAIN ADMIN PANEL -->
+    <div class="min-h-screen pt-16">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            
+            <!-- Header Section -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold text-neutral-900 mb-2">Panel de Administración</h1>
+                <p class="text-neutral-600">Gestiona contenido, usuarios y configuraciones de World Cup Hub</p>
+            </div>
+
+            <!-- Stats Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-md border border-neutral-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-neutral-600">Posts Pendientes</p>
+                            <p class="text-2xl font-bold text-neutral-900">12</p>
+                        </div>
+                        <div class="bg-yellow-100 p-3 rounded-full">
+                            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-md border border-neutral-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-neutral-600">Comentarios</p>
+                            <p class="text-2xl font-bold text-neutral-900">248</p>
+                        </div>
+                        <div class="bg-blue-100 p-3 rounded-full">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-md border border-neutral-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-neutral-600">Categorías</p>
+                            <p class="text-2xl font-bold text-neutral-900">8</p>
+                        </div>
+                        <div class="bg-green-100 p-3 rounded-full">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-md border border-neutral-200">
+                    <div class="flex items-center justify-between">
+                        <div>
+                            <p class="text-sm font-medium text-neutral-600">Mundiales</p>
+                            <p class="text-2xl font-bold text-neutral-900">22</p>
+                        </div>
+                        <div class="bg-purple-100 p-3 rounded-full">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+                            </svg>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Navigation Cards -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <a href="approvePost.html" class="block bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-neutral-200 group">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-yellow-100 p-3 rounded-full group-hover:bg-yellow-200 transition-colors">
+                            <svg class="w-8 h-8 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-neutral-900">Aprobación de Posts</h3>
+                            <p class="text-sm text-neutral-600">Revisar y aprobar publicaciones pendientes</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="categoryManagement.html" class="block bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-neutral-200 group">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-green-100 p-3 rounded-full group-hover:bg-green-200 transition-colors">
+                            <svg class="w-8 h-8 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-neutral-900">Gestión de Categorías</h3>
+                            <p class="text-sm text-neutral-600">Crear, editar y eliminar categorías</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="worldCupManagement.html" class="block bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-neutral-200 group">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-purple-100 p-3 rounded-full group-hover:bg-purple-200 transition-colors">
+                            <svg class="w-8 h-8 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 01-9 9m9-9a9 9 0 00-9-9m9 9H3m9 9v-9m0-9v9"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-neutral-900">Gestión de Mundiales</h3>
+                            <p class="text-sm text-neutral-600">Administrar información de cada mundial</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="commentManagement.html" class="block bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-neutral-200 group">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-blue-100 p-3 rounded-full group-hover:bg-blue-200 transition-colors">
+                            <svg class="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-3.582 9 8z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-neutral-900">Gestión de Comentarios</h3>
+                            <p class="text-sm text-neutral-600">Moderar y eliminar comentarios</p>
+                        </div>
+                    </div>
+                </a>
+
+                <a href="../pages/feed.html" class="block bg-white p-6 rounded-xl shadow-md hover:shadow-lg transition-shadow border border-neutral-200 group">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-indigo-100 p-3 rounded-full group-hover:bg-indigo-200 transition-colors">
+                            <svg class="w-8 h-8 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2H5a2 2 0 00-2-2z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="m7 7l5 5 5-5"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-neutral-900">Ver Feed Principal</h3>
+                            <p class="text-sm text-neutral-600">Ir al feed público de la aplicación</p>
+                        </div>
+                    </div>
+                </a>
+
+                <div class="block bg-white p-6 rounded-xl shadow-md border border-neutral-200">
+                    <div class="flex items-center space-x-4">
+                        <div class="bg-red-100 p-3 rounded-full">
+                            <svg class="w-8 h-8 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-2.5L13.732 4c-.77-.833-1.732-.833-2.5 0L4.268 15.5c-.77.833.192 2.5 1.732 2.5z"></path>
+                            </svg>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-semibold text-neutral-900">Sistema de Alertas</h3>
+                            <p class="text-sm text-neutral-600">Configuración de notificaciones</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- JavaScript para cargar navbar -->
+    <script>
+        // Cargar navbar
+        fetch('../components/navbar.html?v=2')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('navbar').innerHTML = data;
+                // Inicializar navbar
+                setTimeout(() => {
+                    const menuButton = document.getElementById('menuButton');
+                    const sidebarMenu = document.getElementById('sidebarMenu');
+                    const closeMenuButton = document.getElementById('closeMenuButton');
+                    const menuOverlay = document.getElementById('menuOverlay');
+
+                    if (menuButton && sidebarMenu) {
+                        menuButton.addEventListener('click', function() {
+                            sidebarMenu.classList.remove('hidden');
+                        });
+                        if (closeMenuButton) {
+                            closeMenuButton.addEventListener('click', function() {
+                                sidebarMenu.classList.add('hidden');
+                            });
+                        }
+                        if (menuOverlay) {
+                            menuOverlay.addEventListener('click', function() {
+                                sidebarMenu.classList.add('hidden');
+                            });
+                        }
+                    }
+                }, 100);
+            })
+            .catch(error => console.error('Error cargando navbar:', error));
+    </script>
+
+</body>
+</html>

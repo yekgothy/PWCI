@@ -1,0 +1,348 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Categorías - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-neutral-50 text-neutral-900 font-sans">
+
+    <!-- NAVBAR COMPONENT -->
+    <div id="navbar"></div>
+
+    <!-- MAIN CONTENT -->
+    <div class="min-h-screen pt-16">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            
+            <!-- Header -->
+            <div class="mb-8 flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-neutral-900 mb-2">Gestión de Categorías</h1>
+                    <p class="text-neutral-600">Administra las categorías disponibles para las publicaciones</p>
+                </div>
+                <div class="flex space-x-3">
+                    <button id="newCategoryBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        + Nueva Categoría
+                    </button>
+                    <a href="adminPanel.html" class="bg-neutral-200 hover:bg-neutral-300 text-neutral-700 px-4 py-2 rounded-lg transition-colors">
+                        ← Volver al Panel
+                    </a>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-md border border-neutral-200">
+                    <h3 class="text-lg font-semibold text-neutral-900 mb-1">Total Categorías</h3>
+                    <p class="text-3xl font-bold text-blue-600">8</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-neutral-200">
+                    <h3 class="text-lg font-semibold text-neutral-900 mb-1">Más Popular</h3>
+                    <p class="text-lg text-neutral-700">Selecciones (124 posts)</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-neutral-200">
+                    <h3 class="text-lg font-semibold text-neutral-900 mb-1">Menos Usada</h3>
+                    <p class="text-lg text-neutral-700">Arbitraje (3 posts)</p>
+                </div>
+            </div>
+
+            <!-- Categories Table -->
+            <div class="bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden">
+                <div class="px-6 py-4 border-b border-neutral-200">
+                    <h2 class="text-lg font-semibold text-neutral-900">Categorías Existentes</h2>
+                </div>
+                
+                <div class="overflow-x-auto">
+                    <table class="w-full">
+                        <thead class="bg-neutral-50">
+                            <tr>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Categoría</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Descripción</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Publicaciones</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Estado</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-neutral-500 uppercase tracking-wider">Acciones</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-neutral-200">
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-blue-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-blue-600 font-semibold">S</span>
+                                        </div>
+                                        <span class="font-medium text-neutral-900">Selecciones</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-neutral-600">Noticias y discusiones sobre selecciones nacionales</td>
+                                <td class="px-6 py-4 text-sm text-neutral-900 font-medium">124</td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Activa</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">Editar</button>
+                                        <button class="text-red-600 hover:text-red-800">Eliminar</button>
+                                    </div>
+                                </td>
+                            </tr>
+                            
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-green-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-green-600 font-semibold">H</span>
+                                        </div>
+                                        <span class="font-medium text-neutral-900">Historia</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-neutral-600">Momentos históricos de los mundiales</td>
+                                <td class="px-6 py-4 text-sm text-neutral-900 font-medium">89</td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Activa</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">Editar</button>
+                                        <button class="text-red-600 hover:text-red-800">Eliminar</button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-purple-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-purple-600 font-semibold">E</span>
+                                        </div>
+                                        <span class="font-medium text-neutral-900">Estadísticas</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-neutral-600">Datos y análisis estadísticos</td>
+                                <td class="px-6 py-4 text-sm text-neutral-900 font-medium">67</td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Activa</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">Editar</button>
+                                        <button class="text-red-600 hover:text-red-800">Eliminar</button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-yellow-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-yellow-600 font-semibold">T</span>
+                                        </div>
+                                        <span class="font-medium text-neutral-900">Táctica</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-neutral-600">Análisis tácticos y formaciones</td>
+                                <td class="px-6 py-4 text-sm text-neutral-900 font-medium">45</td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Activa</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">Editar</button>
+                                        <button class="text-red-600 hover:text-red-800">Eliminar</button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-red-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-red-600 font-semibold">J</span>
+                                        </div>
+                                        <span class="font-medium text-neutral-900">Jugadores</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-neutral-600">Noticias sobre jugadores destacados</td>
+                                <td class="px-6 py-4 text-sm text-neutral-900 font-medium">32</td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Activa</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">Editar</button>
+                                        <button class="text-red-600 hover:text-red-800">Eliminar</button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-indigo-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-indigo-600 font-semibold">N</span>
+                                        </div>
+                                        <span class="font-medium text-neutral-900">Noticias</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-neutral-600">Noticias generales del mundial</td>
+                                <td class="px-6 py-4 text-sm text-neutral-900 font-medium">28</td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Activa</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">Editar</button>
+                                        <button class="text-red-600 hover:text-red-800">Eliminar</button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-orange-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-orange-600 font-semibold">M</span>
+                                        </div>
+                                        <span class="font-medium text-neutral-900">Memes</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-neutral-600">Contenido humorístico relacionado</td>
+                                <td class="px-6 py-4 text-sm text-neutral-900 font-medium">15</td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded-full">Pausada</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">Editar</button>
+                                        <button class="text-red-600 hover:text-red-800">Eliminar</button>
+                                    </div>
+                                </td>
+                            </tr>
+
+                            <tr>
+                                <td class="px-6 py-4 whitespace-nowrap">
+                                    <div class="flex items-center">
+                                        <div class="w-8 h-8 bg-gray-100 rounded-full flex items-center justify-center mr-3">
+                                            <span class="text-gray-600 font-semibold">A</span>
+                                        </div>
+                                        <span class="font-medium text-neutral-900">Arbitraje</span>
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4 text-sm text-neutral-600">Decisiones arbitrales y reglamento</td>
+                                <td class="px-6 py-4 text-sm text-neutral-900 font-medium">3</td>
+                                <td class="px-6 py-4">
+                                    <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Activa</span>
+                                </td>
+                                <td class="px-6 py-4 text-sm">
+                                    <div class="flex space-x-2">
+                                        <button class="text-blue-600 hover:text-blue-800">Editar</button>
+                                        <button class="text-red-600 hover:text-red-800">Eliminar</button>
+                                    </div>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal Nueva Categoría -->
+    <div id="newCategoryModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-md mx-4">
+            <h3 class="text-lg font-semibold text-neutral-900 mb-4">Nueva Categoría</h3>
+            
+            <form class="space-y-4">
+                <div>
+                    <label class="block text-sm font-medium text-neutral-700 mb-1">Nombre</label>
+                    <input type="text" class="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: Equipos">
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-neutral-700 mb-1">Descripción</label>
+                    <textarea class="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows="3" placeholder="Descripción de la categoría..."></textarea>
+                </div>
+                
+                <div>
+                    <label class="block text-sm font-medium text-neutral-700 mb-1">Color</label>
+                    <select class="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="blue">Azul</option>
+                        <option value="green">Verde</option>
+                        <option value="purple">Morado</option>
+                        <option value="yellow">Amarillo</option>
+                        <option value="red">Rojo</option>
+                        <option value="indigo">Índigo</option>
+                        <option value="orange">Naranja</option>
+                        <option value="gray">Gris</option>
+                    </select>
+                </div>
+
+                <div class="flex space-x-3 pt-4">
+                    <button type="button" id="cancelModal" class="flex-1 bg-neutral-200 hover:bg-neutral-300 text-neutral-700 py-2 px-4 rounded-lg transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors">
+                        Crear Categoría
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Cargar navbar
+        fetch('../components/navbar.html?v=2')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('navbar').innerHTML = data;
+                // Inicializar navbar
+                setTimeout(() => {
+                    const menuButton = document.getElementById('menuButton');
+                    const sidebarMenu = document.getElementById('sidebarMenu');
+                    const closeMenuButton = document.getElementById('closeMenuButton');
+                    const menuOverlay = document.getElementById('menuOverlay');
+
+                    if (menuButton && sidebarMenu) {
+                        menuButton.addEventListener('click', function() {
+                            sidebarMenu.classList.remove('hidden');
+                        });
+                        if (closeMenuButton) {
+                            closeMenuButton.addEventListener('click', function() {
+                                sidebarMenu.classList.add('hidden');
+                            });
+                        }
+                        if (menuOverlay) {
+                            menuOverlay.addEventListener('click', function() {
+                                sidebarMenu.classList.add('hidden');
+                            });
+                        }
+                    }
+                }, 100);
+            })
+            .catch(error => console.error('Error cargando navbar:', error));
+
+        // Modal functionality
+        const newCategoryBtn = document.getElementById('newCategoryBtn');
+        const newCategoryModal = document.getElementById('newCategoryModal');
+        const cancelModal = document.getElementById('cancelModal');
+
+        newCategoryBtn.addEventListener('click', () => {
+            newCategoryModal.classList.remove('hidden');
+        });
+
+        cancelModal.addEventListener('click', () => {
+            newCategoryModal.classList.add('hidden');
+        });
+
+        // Close modal on background click
+        newCategoryModal.addEventListener('click', (e) => {
+            if (e.target === newCategoryModal) {
+                newCategoryModal.classList.add('hidden');
+            }
+        });
+    </script>
+
+</body>
+</html>

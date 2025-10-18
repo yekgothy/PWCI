@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gestión de Mundiales - Admin</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-neutral-50 text-neutral-900 font-sans">
+
+    <!-- NAVBAR COMPONENT -->
+    <div id="navbar"></div>
+
+    <!-- MAIN CONTENT -->
+    <div class="min-h-screen pt-16">
+        <div class="max-w-7xl mx-auto px-4 py-8">
+            
+            <!-- Header -->
+            <div class="mb-8 flex items-center justify-between">
+                <div>
+                    <h1 class="text-3xl font-bold text-neutral-900 mb-2">Gestión de Mundiales</h1>
+                    <p class="text-neutral-600">Administra la información de cada Copa del Mundo</p>
+                </div>
+                <div class="flex space-x-3">
+                    <button id="newWorldCupBtn" class="bg-blue-500 hover:bg-blue-600 text-white px-4 py-2 rounded-lg transition-colors">
+                        + Nuevo Mundial
+                    </button>
+                    <a href="adminPanel.html" class="bg-neutral-200 hover:bg-neutral-300 text-neutral-700 px-4 py-2 rounded-lg transition-colors">
+                        ← Volver al Panel
+                    </a>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                <div class="bg-white p-6 rounded-xl shadow-md border border-neutral-200">
+                    <h3 class="text-lg font-semibold text-neutral-900 mb-1">Total Mundiales</h3>
+                    <p class="text-3xl font-bold text-blue-600">22</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-neutral-200">
+                    <h3 class="text-lg font-semibold text-neutral-900 mb-1">Último Mundial</h3>
+                    <p class="text-lg text-neutral-700">Qatar 2022</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-neutral-200">
+                    <h3 class="text-lg font-semibold text-neutral-900 mb-1">Próximo Mundial</h3>
+                    <p class="text-lg text-neutral-700">2026 (USA/CAN/MEX)</p>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-md border border-neutral-200">
+                    <h3 class="text-lg font-semibold text-neutral-900 mb-1">Más Visitado</h3>
+                    <p class="text-lg text-neutral-700">Brasil 2014</p>
+                </div>
+            </div>
+
+            <!-- World Cups Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                
+                <!-- 2026 World Cup -->
+                <div class="bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden">
+                    <div class="h-48 bg-gradient-to-br from-red-500 to-blue-600 flex items-center justify-center">
+                        <div class="text-center text-white">
+                            <h3 class="text-2xl font-bold">2026</h3>
+                            <p class="text-sm opacity-90">USA • CANADA • MEXICO</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-lg font-semibold text-neutral-900">Copa Mundial 2026</h4>
+                            <span class="bg-green-100 text-green-800 text-xs px-2 py-1 rounded-full">Próximo</span>
+                        </div>
+                        <div class="text-sm text-neutral-600 space-y-1 mb-4">
+                            <p><span class="font-medium">Fecha:</span> 11 Jun - 19 Jul 2026</p>
+                            <p><span class="font-medium">Sedes:</span> 16 ciudades</p>
+                            <p><span class="font-medium">Equipos:</span> 48</p>
+                            <p><span class="font-medium">Partidos:</span> 104</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 py-2 px-3 rounded-lg transition-colors text-sm">
+                                Editar
+                            </button>
+                            <button class="flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 py-2 px-3 rounded-lg transition-colors text-sm">
+                                Ver Detalles
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2022 World Cup -->
+                <div class="bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden">
+                    <div class="h-48 bg-gradient-to-br from-purple-600 to-red-500 flex items-center justify-center">
+                        <div class="text-center text-white">
+                            <h3 class="text-2xl font-bold">2022</h3>
+                            <p class="text-sm opacity-90">QATAR</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-lg font-semibold text-neutral-900">Copa Mundial Qatar</h4>
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Completado</span>
+                        </div>
+                        <div class="text-sm text-neutral-600 space-y-1 mb-4">
+                            <p><span class="font-medium">Fecha:</span> 20 Nov - 18 Dic 2022</p>
+                            <p><span class="font-medium">Sedes:</span> 8 ciudades</p>
+                            <p><span class="font-medium">Equipos:</span> 32</p>
+                            <p><span class="font-medium">Campeón:</span> Argentina 🏆</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 py-2 px-3 rounded-lg transition-colors text-sm">
+                                Editar
+                            </button>
+                            <button class="flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 py-2 px-3 rounded-lg transition-colors text-sm">
+                                Ver Detalles
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2018 World Cup -->
+                <div class="bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden">
+                    <div class="h-48 bg-gradient-to-br from-red-600 to-blue-500 flex items-center justify-center">
+                        <div class="text-center text-white">
+                            <h3 class="text-2xl font-bold">2018</h3>
+                            <p class="text-sm opacity-90">RUSIA</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-lg font-semibold text-neutral-900">Copa Mundial Rusia</h4>
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Completado</span>
+                        </div>
+                        <div class="text-sm text-neutral-600 space-y-1 mb-4">
+                            <p><span class="font-medium">Fecha:</span> 14 Jun - 15 Jul 2018</p>
+                            <p><span class="font-medium">Sedes:</span> 11 ciudades</p>
+                            <p><span class="font-medium">Equipos:</span> 32</p>
+                            <p><span class="font-medium">Campeón:</span> Francia 🏆</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 py-2 px-3 rounded-lg transition-colors text-sm">
+                                Editar
+                            </button>
+                            <button class="flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 py-2 px-3 rounded-lg transition-colors text-sm">
+                                Ver Detalles
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2014 World Cup -->
+                <div class="bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden">
+                    <div class="h-48 bg-gradient-to-br from-green-500 to-yellow-400 flex items-center justify-center">
+                        <div class="text-center text-white">
+                            <h3 class="text-2xl font-bold">2014</h3>
+                            <p class="text-sm opacity-90">BRASIL</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-lg font-semibold text-neutral-900">Copa Mundial Brasil</h4>
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Completado</span>
+                        </div>
+                        <div class="text-sm text-neutral-600 space-y-1 mb-4">
+                            <p><span class="font-medium">Fecha:</span> 12 Jun - 13 Jul 2014</p>
+                            <p><span class="font-medium">Sedes:</span> 12 ciudades</p>
+                            <p><span class="font-medium">Equipos:</span> 32</p>
+                            <p><span class="font-medium">Campeón:</span> Alemania 🏆</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 py-2 px-3 rounded-lg transition-colors text-sm">
+                                Editar
+                            </button>
+                            <button class="flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 py-2 px-3 rounded-lg transition-colors text-sm">
+                                Ver Detalles
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 2010 World Cup -->
+                <div class="bg-white rounded-xl shadow-md border border-neutral-200 overflow-hidden">
+                    <div class="h-48 bg-gradient-to-br from-yellow-500 to-red-600 flex items-center justify-center">
+                        <div class="text-center text-white">
+                            <h3 class="text-2xl font-bold">2010</h3>
+                            <p class="text-sm opacity-90">SUDÁFRICA</p>
+                        </div>
+                    </div>
+                    <div class="p-6">
+                        <div class="flex items-center justify-between mb-3">
+                            <h4 class="text-lg font-semibold text-neutral-900">Copa Mundial Sudáfrica</h4>
+                            <span class="bg-blue-100 text-blue-800 text-xs px-2 py-1 rounded-full">Completado</span>
+                        </div>
+                        <div class="text-sm text-neutral-600 space-y-1 mb-4">
+                            <p><span class="font-medium">Fecha:</span> 11 Jun - 11 Jul 2010</p>
+                            <p><span class="font-medium">Sedes:</span> 9 ciudades</p>
+                            <p><span class="font-medium">Equipos:</span> 32</p>
+                            <p><span class="font-medium">Campeón:</span> España 🏆</p>
+                        </div>
+                        <div class="flex space-x-2">
+                            <button class="flex-1 bg-blue-100 hover:bg-blue-200 text-blue-700 py-2 px-3 rounded-lg transition-colors text-sm">
+                                Editar
+                            </button>
+                            <button class="flex-1 bg-neutral-100 hover:bg-neutral-200 text-neutral-700 py-2 px-3 rounded-lg transition-colors text-sm">
+                                Ver Detalles
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Add More Card -->
+                <div class="bg-neutral-100 border-2 border-dashed border-neutral-300 rounded-xl flex items-center justify-center h-[400px] hover:border-neutral-400 transition-colors cursor-pointer" id="addMoreWorldCup">
+                    <div class="text-center text-neutral-500">
+                        <svg class="w-12 h-12 mx-auto mb-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"></path>
+                        </svg>
+                        <p class="font-medium">Agregar Mundial</p>
+                        <p class="text-sm">Crear nueva edición</p>
+                    </div>
+                </div>
+
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Modal Nuevo Mundial -->
+    <div id="newWorldCupModal" class="hidden fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+        <div class="bg-white rounded-xl p-6 w-full max-w-2xl mx-4 max-h-[90vh] overflow-y-auto">
+            <h3 class="text-lg font-semibold text-neutral-900 mb-4">Nuevo Mundial</h3>
+            
+            <form class="space-y-6">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-700 mb-1">Año</label>
+                        <input type="number" class="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="2030">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-700 mb-1">Países Sede</label>
+                        <input type="text" class="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="Ej: Argentina • Uruguay">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-700 mb-1">Fecha Inicio</label>
+                        <input type="date" class="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-700 mb-1">Fecha Final</label>
+                        <input type="date" class="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-700 mb-1">Número de Equipos</label>
+                        <select class="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                            <option value="32">32 equipos</option>
+                            <option value="48">48 equipos</option>
+                        </select>
+                    </div>
+                    
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-700 mb-1">Número de Sedes</label>
+                        <input type="number" class="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" placeholder="16">
+                    </div>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-neutral-700 mb-1">Logo/Emblem</label>
+                    <input type="file" class="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" accept="image/*">
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-neutral-700 mb-1">Descripción</label>
+                    <textarea class="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500" rows="3" placeholder="Descripción del mundial..."></textarea>
+                </div>
+
+                <div>
+                    <label class="block text-sm font-medium text-neutral-700 mb-1">Estado</label>
+                    <select class="w-full border border-neutral-300 rounded-lg px-3 py-2 focus:ring-2 focus:ring-blue-500 focus:border-blue-500">
+                        <option value="upcoming">Próximo</option>
+                        <option value="ongoing">En curso</option>
+                        <option value="completed">Completado</option>
+                        <option value="cancelled">Cancelado</option>
+                    </select>
+                </div>
+
+                <div class="flex space-x-3 pt-4">
+                    <button type="button" id="cancelWorldCupModal" class="flex-1 bg-neutral-200 hover:bg-neutral-300 text-neutral-700 py-2 px-4 rounded-lg transition-colors">
+                        Cancelar
+                    </button>
+                    <button type="submit" class="flex-1 bg-blue-500 hover:bg-blue-600 text-white py-2 px-4 rounded-lg transition-colors">
+                        Crear Mundial
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- JavaScript -->
+    <script>
+        // Cargar navbar
+        fetch('../components/navbar.html?v=2')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('navbar').innerHTML = data;
+                // Inicializar navbar
+                setTimeout(() => {
+                    const menuButton = document.getElementById('menuButton');
+                    const sidebarMenu = document.getElementById('sidebarMenu');
+                    const closeMenuButton = document.getElementById('closeMenuButton');
+                    const menuOverlay = document.getElementById('menuOverlay');
+
+                    if (menuButton && sidebarMenu) {
+                        menuButton.addEventListener('click', function() {
+                            sidebarMenu.classList.remove('hidden');
+                        });
+                        if (closeMenuButton) {
+                            closeMenuButton.addEventListener('click', function() {
+                                sidebarMenu.classList.add('hidden');
+                            });
+                        }
+                        if (menuOverlay) {
+                            menuOverlay.addEventListener('click', function() {
+                                sidebarMenu.classList.add('hidden');
+                            });
+                        }
+                    }
+                }, 100);
+            })
+            .catch(error => console.error('Error cargando navbar:', error));
+
+        // Modal functionality
+        const newWorldCupBtn = document.getElementById('newWorldCupBtn');
+        const addMoreWorldCup = document.getElementById('addMoreWorldCup');
+        const newWorldCupModal = document.getElementById('newWorldCupModal');
+        const cancelWorldCupModal = document.getElementById('cancelWorldCupModal');
+
+        function showModal() {
+            newWorldCupModal.classList.remove('hidden');
+        }
+
+        function hideModal() {
+            newWorldCupModal.classList.add('hidden');
+        }
+
+        newWorldCupBtn.addEventListener('click', showModal);
+        addMoreWorldCup.addEventListener('click', showModal);
+        cancelWorldCupModal.addEventListener('click', hideModal);
+
+        // Close modal on background click
+        newWorldCupModal.addEventListener('click', (e) => {
+            if (e.target === newWorldCupModal) {
+                hideModal();
+            }
+        });
+    </script>
+
+</body>
+</html>
