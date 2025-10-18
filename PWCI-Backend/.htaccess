@@ -1,0 +1,44 @@
+# Configuración Apache para el Backend BDM
+
+# Habilitar mod_rewrite para URLs amigables
+RewriteEngine On
+
+# Redireccionar todas las peticiones de API al archivo api.php
+RewriteCond %{REQUEST_FILENAME} !-f
+RewriteCond %{REQUEST_FILENAME} !-d
+RewriteRule ^api/(.*)$ api.php/$1 [QSA,L]
+
+# Configurar headers de seguridad
+Header always set X-Content-Type-Options nosniff
+Header always set X-Frame-Options DENY
+Header always set X-XSS-Protection "1; mode=block"
+
+# Permitir CORS para desarrollo (ajustar en producción)
+Header always set Access-Control-Allow-Origin "*"
+Header always set Access-Control-Allow-Methods "GET, POST, PUT, DELETE, OPTIONS"
+Header always set Access-Control-Allow-Headers "Content-Type, Authorization"
+
+# Configurar tipos MIME
+AddType application/json .json
+AddDefaultCharset utf-8
+
+# Configurar caché para archivos estáticos (requiere mod_expires)
+# <FilesMatch "\.(css|js|png|jpg|jpeg|gif|ico|svg)$">
+#     ExpiresActive On
+#     ExpiresDefault "access plus 1 month"
+# </FilesMatch>
+
+# Proteger archivos sensibles
+<Files "database.php">
+    Require all denied
+</Files>
+
+<Files ".env">
+    Require all denied
+</Files>
+
+# Configurar límites de subida
+php_value upload_max_filesize 10M
+php_value post_max_size 10M
+php_value max_execution_time 300
+php_value max_input_time 300

@@ -1,0 +1,40 @@
+# Archivos de configuración local
+config/local_config.php
+
+# Archivos de prueba temporales
+*temp*.php
+add_test_user.php
+simple_test.php
+setup_database.php
+
+# Excluir test_connection.php está en utils/ y debe incluirse
+
+# Logs
+*.log
+logs/
+
+# Archivos de sistema
+.DS_Store
+Thumbs.db
+
+# Archivos de backup
+*.backup
+*.bak
+
+# Variables de entorno
+.env
+.env.local
+
+# Archivos de IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Archivos de caché
+cache/
+tmp/
+
+# Uploads de usuarios (si los hay)
+uploads/
+files/
