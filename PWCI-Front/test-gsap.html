@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test GSAP</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+    <style>
+        body {
+            margin: 0;
+            padding: 50px;
+            background: #000;
+            color: white;
+            font-family: Arial;
+        }
+        .test-element {
+            background: red;
+            width: 100px;
+            height: 100px;
+            margin: 20px 0;
+            opacity: 0;
+            transform: translateY(50px);
+        }
+    </style>
+</head>
+<body>
+    <h1>Test GSAP</h1>
+    <div class="test-element" id="box1"></div>
+    <div class="test-element" id="box2"></div>
+    <div class="test-element" id="box3"></div>
+
+    <script>
+        console.log('GSAP disponible:', typeof gsap);
+        
+        if (typeof gsap !== 'undefined') {
+            console.log('Iniciando animación...');
+            
+            gsap.to(".test-element", {
+                duration: 1,
+                opacity: 1,
+                y: 0,
+                stagger: 0.2,
+                ease: "power2.out",
+                delay: 0.5
+            });
+        } else {
+            console.error('GSAP no está cargado');
+        }
+    </script>
+</body>
+</html>
