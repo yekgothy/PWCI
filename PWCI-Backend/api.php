@@ -101,6 +101,15 @@ $method = $_SERVER['REQUEST_METHOD'];
 $request = explode('/', trim($_SERVER['PATH_INFO'] ?? '', '/'));
 $endpoint = $request[0] ?? '';
 $input = json_decode(file_get_contents('php://input'), true);
+
+// Manejar subrutas especiales
+if ($endpoint === 'usuarios' && isset($request[2])) {
+    if ($request[2] === 'cambiar-password') {
+        handleCambiarPassword($method, $request, $input);
+        exit;
+    }
+}
+
 switch ($endpoint) {
     case 'auth':
         handleAuth($method, $request, $input);
@@ -356,8 +365,157 @@ function handleUsuarios($method, $request, $input) {
             }
             break;
         
+        case 'PUT':
+            // Actualizar usuario
+            if (!isset($request[1])) {
+                sendError('ID de usuario requerido', 400);
+            }
+            
+            $id = (int)$request[1];
+            
+            // Verificar que el usuario actual es el dueño del perfil o es admin
+            if ($currentUser['idUsuario'] != $id && $currentUser['rol'] !== 'admin') {
+                sendError('No tienes permiso para editar este perfil', 403);
+            }
+            
+            if (!$input) {
+                sendError('Datos requeridos para actualizar', 400);
+            }
+            
+            // Construir query dinámico solo con los campos proporcionados
+            $updates = [];
+            $params = [];
+            
+            if (isset($input['nombreCompleto'])) {
+                $updates[] = "nombreCompleto = ?";
+                $params[] = $input['nombreCompleto'];
+            }
+            if (isset($input['fechaNacimiento'])) {
+                $updates[] = "fechaNacimiento = ?";
+                $params[] = $input['fechaNacimiento'];
+            }
+            if (isset($input['genero'])) {
+                $updates[] = "genero = ?";
+                $params[] = $input['genero'];
+            }
+            if (isset($input['paisNacimiento'])) {
+                $updates[] = "paisNacimiento = ?";
+                $params[] = $input['paisNacimiento'];
+            }
+            if (isset($input['nacionalidad'])) {
+                $updates[] = "nacionalidad = ?";
+                $params[] = $input['nacionalidad'];
+            }
+            if (isset($input['foto'])) {
+                $updates[] = "foto = ?";
+                $params[] = $input['foto'];
+            }
+            
+            if (empty($updates)) {
+                sendError('No hay campos para actualizar', 400);
+            }
+            
+            $params[] = $id;
+            $result = executeQuery(
+                "UPDATE Usuario SET " . implode(', ', $updates) . " WHERE idUsuario = ? AND activo = TRUE",
+                $params
+            );
+            
+            if ($result) {
+                // Obtener usuario actualizado
+                $updatedUser = executeSelect(
+                    "SELECT idUsuario, nombreCompleto, correoElectronico, genero, paisNacimiento, 
+                            nacionalidad, foto, rol, fechaRegistro, activo 
+                     FROM Usuario WHERE idUsuario = ?",
+                    [$id]
+                );
+                sendResponse($updatedUser[0], 200, 'Usuario actualizado correctamente');
+            } else {
+                sendError('Error al actualizar usuario', 500);
+            }
+            break;
+        
+        case 'DELETE':
+            // Desactivar usuario (soft delete)
+            if (!isset($request[1])) {
+                sendError('ID de usuario requerido', 400);
+            }
+            
+            $id = (int)$request[1];
+            
+            // Solo admins o el propio usuario pueden desactivar
+            if ($currentUser['idUsuario'] != $id && $currentUser['rol'] !== 'admin') {
+                sendError('No tienes permiso para desactivar este usuario', 403);
+            }
+            
+            $result = executeQuery(
+                "UPDATE Usuario SET activo = FALSE WHERE idUsuario = ?",
+                [$id]
+            );
+            
+            if ($result) {
+                sendResponse(null, 200, 'Usuario desactivado correctamente');
+            } else {
+                sendError('Error al desactivar usuario', 500);
+            }
+            break;
+        
         default:
             sendError('Método no permitido', 405);
+    }
+}
+
+/**
+ * Cambiar contraseña de usuario
+ */
+function handleCambiarPassword($method, $request, $input) {
+    if ($method !== 'PUT') {
+        sendError('Método no permitido', 405);
+    }
+    
+    $currentUser = requireAuth();
+    
+    if (!isset($request[1])) {
+        sendError('ID de usuario requerido', 400);
+    }
+    
+    $id = (int)$request[1];
+    
+    // Solo el propio usuario puede cambiar su contraseña
+    if ($currentUser['idUsuario'] != $id) {
+        sendError('No tienes permiso para cambiar esta contraseña', 403);
+    }
+    
+    if (!$input || empty($input['contrasenaActual']) || empty($input['contrasenaNueva'])) {
+        sendError('Se requiere: contrasenaActual, contrasenaNueva');
+    }
+    
+    // Verificar contraseña actual
+    $user = executeSelect(
+        "SELECT contrasena FROM Usuario WHERE idUsuario = ? AND activo = TRUE",
+        [$id]
+    );
+    
+    if (!$user || !password_verify($input['contrasenaActual'], $user[0]['contrasena'])) {
+        sendError('Contraseña actual incorrecta', 401);
+    }
+    
+    // Validar nueva contraseña
+    if (strlen($input['contrasenaNueva']) < 6) {
+        sendError('La nueva contraseña debe tener al menos 6 caracteres');
+    }
+    
+    // Actualizar contraseña
+    $hashedPassword = password_hash($input['contrasenaNueva'], PASSWORD_DEFAULT);
+    $result = executeQuery(
+        "UPDATE Usuario SET contrasena = ? WHERE idUsuario = ?",
+        [$hashedPassword, $id]
+    );
+    
+    if ($result) {
+        sendResponse(null, 200, 'Contraseña actualizada correctamente');
+    } else {
+        sendError('Error al actualizar contraseña', 500);
     }
 }
 
@@ -365,16 +523,52 @@ function handleUsuarios($method, $request, $input) {
  * Manejar operaciones de publicaciones
  */
 function handlePublicaciones($method, $request, $input) {
-    // Las publicaciones públicas pueden verse sin auth, pero crear requiere auth
+    // Manejo de subrutas especiales para publicaciones
+    if (isset($request[2])) {
+        $action = $request[2];
+        $id = isset($request[1]) ? (int)$request[1] : null;
+        
+        if ($action === 'aprobar' && $method === 'PUT') {
+            return handleAprobarPublicacion($id);
+        } elseif ($action === 'rechazar' && $method === 'PUT') {
+            return handleRechazarPublicacion($id, $input);
+        } elseif ($action === 'like' && $method === 'POST') {
+            return handleLikePublicacion($id);
+        } elseif ($action === 'dislike' && $method === 'POST') {
+            return handleDislikePublicacion($id);
+        } elseif ($action === 'interaccion' && $method === 'DELETE') {
+            return handleQuitarInteraccion($id);
+        }
+    }
+    
+    // Las publicaciones públicas pueden verse sin auth
     $currentUser = null;
     
-    // Solo requiere auth para POST (crear publicación)
-    if ($method === 'POST') {
+    // Requiere auth para POST, PUT, DELETE
+    if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
         $currentUser = requireAuth();
     }
     
     switch ($method) {
         case 'GET':
+            // Verificar si se solicitan publicaciones pendientes
+            if (isset($request[1]) && $request[1] === 'pendientes') {
+                $currentUser = requireAuth();
+                requireAdmin($currentUser);
+                
+                $publicaciones = executeSelect(
+                    "SELECT p.*, u.nombreCompleto as autor, m.anio as mundialAnio, c.nombre as categoriaNombre
+                     FROM Publicacion p
+                     JOIN Usuario u ON p.idUsuario = u.idUsuario
+                     JOIN Mundial m ON p.idMundial = m.idMundial
+                     JOIN Categoria c ON p.idCategoria = c.idCategoria
+                     WHERE p.estado = 'pendiente'
+                     ORDER BY p.fechaPublicacion DESC"
+                );
+                sendResponse($publicaciones, 200, 'Publicaciones pendientes obtenidas correctamente');
+                break;
+            }
+            
             if (isset($request[1])) {
                 // Obtener publicación específica
                 $id = (int)$request[1];
@@ -436,18 +630,302 @@ function handlePublicaciones($method, $request, $input) {
             }
             break;
         
+        case 'PUT':
+            // Actualizar publicación
+            if (!isset($request[1])) {
+                sendError('ID de publicación requerido', 400);
+            }
+            
+            $id = (int)$request[1];
+            
+            // Verificar que la publicación existe y obtener su dueño
+            $publicacion = executeSelect(
+                "SELECT idUsuario FROM Publicacion WHERE idPublicacion = ?",
+                [$id]
+            );
+            
+            if (!$publicacion) {
+                sendError('Publicación no encontrada', 404);
+            }
+            
+            // Verificar que el usuario actual es el dueño o es admin
+            if ($currentUser['idUsuario'] != $publicacion[0]['idUsuario'] && $currentUser['rol'] !== 'admin') {
+                sendError('No tienes permiso para editar esta publicación', 403);
+            }
+            
+            if (!$input) {
+                sendError('Datos requeridos para actualizar', 400);
+            }
+            
+            // Construir query dinámico
+            $updates = [];
+            $params = [];
+            
+            if (isset($input['titulo'])) {
+                $updates[] = "titulo = ?";
+                $params[] = $input['titulo'];
+            }
+            if (isset($input['contenido'])) {
+                $updates[] = "contenido = ?";
+                $params[] = $input['contenido'];
+            }
+            if (isset($input['urlMultimedia'])) {
+                $updates[] = "urlMultimedia = ?";
+                $params[] = $input['urlMultimedia'];
+            }
+            if (isset($input['idMundial'])) {
+                $updates[] = "idMundial = ?";
+                $params[] = $input['idMundial'];
+            }
+            if (isset($input['idCategoria'])) {
+                $updates[] = "idCategoria = ?";
+                $params[] = $input['idCategoria'];
+            }
+            
+            if (empty($updates)) {
+                sendError('No hay campos para actualizar', 400);
+            }
+            
+            $params[] = $id;
+            $result = executeQuery(
+                "UPDATE Publicacion SET " . implode(', ', $updates) . " WHERE idPublicacion = ?",
+                $params
+            );
+            
+            if ($result !== false) {
+                sendResponse(null, 200, 'Publicación actualizada correctamente');
+            } else {
+                sendError('Error al actualizar publicación', 500);
+            }
+            break;
+        
+        case 'DELETE':
+            // Eliminar publicación
+            if (!isset($request[1])) {
+                sendError('ID de publicación requerido', 400);
+            }
+            
+            $id = (int)$request[1];
+            
+            // Verificar que la publicación existe y obtener su dueño
+            $publicacion = executeSelect(
+                "SELECT idUsuario FROM Publicacion WHERE idPublicacion = ?",
+                [$id]
+            );
+            
+            if (!$publicacion) {
+                sendError('Publicación no encontrada', 404);
+            }
+            
+            // Solo el dueño o admin pueden eliminar
+            if ($currentUser['idUsuario'] != $publicacion[0]['idUsuario'] && $currentUser['rol'] !== 'admin') {
+                sendError('No tienes permiso para eliminar esta publicación', 403);
+            }
+            
+            $result = executeQuery(
+                "DELETE FROM Publicacion WHERE idPublicacion = ?",
+                [$id]
+            );
+            
+            if ($result !== false) {
+                sendResponse(null, 200, 'Publicación eliminada correctamente');
+            } else {
+                sendError('Error al eliminar publicación', 500);
+            }
+            break;
+        
         default:
             sendError('Método no permitido', 405);
     }
 }
 
 /**
+ * Aprobar publicación (admin)
+ */
+function handleAprobarPublicacion($id) {
+    $currentUser = requireAuth();
+    requireAdmin($currentUser);
+    
+    if (!$id) {
+        sendError('ID de publicación requerido', 400);
+    }
+    
+    $result = executeQuery(
+        "UPDATE Publicacion SET estado = 'aprobada', fechaAprobacion = NOW() WHERE idPublicacion = ?",
+        [$id]
+    );
+    
+    if ($result !== false) {
+        sendResponse(null, 200, 'Publicación aprobada correctamente');
+    } else {
+        sendError('Error al aprobar publicación', 500);
+    }
+}
+
+/**
+ * Rechazar publicación (admin)
+ */
+function handleRechazarPublicacion($id, $input) {
+    $currentUser = requireAuth();
+    requireAdmin($currentUser);
+    
+    if (!$id) {
+        sendError('ID de publicación requerido', 400);
+    }
+    
+    $motivo = $input['motivo'] ?? 'No especificado';
+    
+    $result = executeQuery(
+        "UPDATE Publicacion SET estado = 'rechazada', motivoRechazo = ? WHERE idPublicacion = ?",
+        [$motivo, $id]
+    );
+    
+    if ($result !== false) {
+        sendResponse(null, 200, 'Publicación rechazada correctamente');
+    } else {
+        sendError('Error al rechazar publicación', 500);
+    }
+}
+
+/**
+ * Dar like a publicación
+ */
+function handleLikePublicacion($id) {
+    $currentUser = requireAuth();
+    
+    if (!$id) {
+        sendError('ID de publicación requerido', 400);
+    }
+    
+    // Verificar si ya existe una interacción
+    $existing = executeSelect(
+        "SELECT tipo FROM Interaccion WHERE idUsuario = ? AND idPublicacion = ?",
+        [$currentUser['idUsuario'], $id]
+    );
+    
+    if ($existing) {
+        // Ya existe, actualizar si es diferente
+        if ($existing[0]['tipo'] === 'like') {
+            sendError('Ya diste like a esta publicación', 409);
+        }
+        
+        // Cambiar de dislike a like
+        executeQuery(
+            "UPDATE Interaccion SET tipo = 'like', fecha = NOW() WHERE idUsuario = ? AND idPublicacion = ?",
+            [$currentUser['idUsuario'], $id]
+        );
+        executeQuery("UPDATE Publicacion SET dislikes = dislikes - 1, likes = likes + 1 WHERE idPublicacion = ?", [$id]);
+    } else {
+        // Crear nueva interacción
+        executeQuery(
+            "INSERT INTO Interaccion (idUsuario, idPublicacion, tipo) VALUES (?, ?, 'like')",
+            [$currentUser['idUsuario'], $id]
+        );
+        executeQuery("UPDATE Publicacion SET likes = likes + 1 WHERE idPublicacion = ?", [$id]);
+    }
+    
+    sendResponse(null, 200, 'Like registrado correctamente');
+}
+
+/**
+ * Dar dislike a publicación
+ */
+function handleDislikePublicacion($id) {
+    $currentUser = requireAuth();
+    
+    if (!$id) {
+        sendError('ID de publicación requerido', 400);
+    }
+    
+    // Verificar si ya existe una interacción
+    $existing = executeSelect(
+        "SELECT tipo FROM Interaccion WHERE idUsuario = ? AND idPublicacion = ?",
+        [$currentUser['idUsuario'], $id]
+    );
+    
+    if ($existing) {
+        // Ya existe, actualizar si es diferente
+        if ($existing[0]['tipo'] === 'dislike') {
+            sendError('Ya diste dislike a esta publicación', 409);
+        }
+        
+        // Cambiar de like a dislike
+        executeQuery(
+            "UPDATE Interaccion SET tipo = 'dislike', fecha = NOW() WHERE idUsuario = ? AND idPublicacion = ?",
+            [$currentUser['idUsuario'], $id]
+        );
+        executeQuery("UPDATE Publicacion SET likes = likes - 1, dislikes = dislikes + 1 WHERE idPublicacion = ?", [$id]);
+    } else {
+        // Crear nueva interacción
+        executeQuery(
+            "INSERT INTO Interaccion (idUsuario, idPublicacion, tipo) VALUES (?, ?, 'dislike')",
+            [$currentUser['idUsuario'], $id]
+        );
+        executeQuery("UPDATE Publicacion SET dislikes = dislikes + 1 WHERE idPublicacion = ?", [$id]);
+    }
+    
+    sendResponse(null, 200, 'Dislike registrado correctamente');
+}
+
+/**
+ * Quitar like/dislike
+ */
+function handleQuitarInteraccion($id) {
+    $currentUser = requireAuth();
+    
+    if (!$id) {
+        sendError('ID de publicación requerido', 400);
+    }
+    
+    // Obtener tipo de interacción actual
+    $existing = executeSelect(
+        "SELECT tipo FROM Interaccion WHERE idUsuario = ? AND idPublicacion = ?",
+        [$currentUser['idUsuario'], $id]
+    );
+    
+    if (!$existing) {
+        sendError('No tienes interacción con esta publicación', 404);
+    }
+    
+    $tipo = $existing[0]['tipo'];
+    
+    // Eliminar interacción
+    executeQuery(
+        "DELETE FROM Interaccion WHERE idUsuario = ? AND idPublicacion = ?",
+        [$currentUser['idUsuario'], $id]
+    );
+    
+    // Actualizar contador
+    if ($tipo === 'like') {
+        executeQuery("UPDATE Publicacion SET likes = likes - 1 WHERE idPublicacion = ?", [$id]);
+    } else {
+        executeQuery("UPDATE Publicacion SET dislikes = dislikes - 1 WHERE idPublicacion = ?", [$id]);
+    }
+    
+    sendResponse(null, 200, 'Interacción eliminada correctamente');
+}
+
+/**
+ * Manejar operaciones de comentarios
+ */
+
+/**
  * Manejar operaciones de comentarios
  */
 function handleComentarios($method, $request, $input) {
-    // Comentar requiere autenticación
+    // Manejo de subrutas especiales
+    if (isset($request[2])) {
+        $action = $request[2];
+        $id = isset($request[1]) ? (int)$request[1] : null;
+        
+        if ($action === 'reportar' && $method === 'POST') {
+            return handleReportarComentario($id, $input);
+        }
+    }
+    
+    // Requiere auth para POST, PUT, DELETE
     $currentUser = null;
-    if ($method === 'POST') {
+    if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
         $currentUser = requireAuth();
     }
     
@@ -489,8 +967,134 @@ function handleComentarios($method, $request, $input) {
             }
             break;
         
+        case 'PUT':
+            // Editar comentario
+            if (!isset($request[1])) {
+                sendError('ID de comentario requerido', 400);
+            }
+            
+            $id = (int)$request[1];
+            
+            // Verificar que el comentario existe y obtener su dueño
+            $comentario = executeSelect(
+                "SELECT idUsuario FROM Comentario WHERE idComentario = ? AND activo = TRUE",
+                [$id]
+            );
+            
+            if (!$comentario) {
+                sendError('Comentario no encontrado', 404);
+            }
+            
+            // Solo el dueño o admin pueden editar
+            if ($currentUser['idUsuario'] != $comentario[0]['idUsuario'] && $currentUser['rol'] !== 'admin') {
+                sendError('No tienes permiso para editar este comentario', 403);
+            }
+            
+            if (!$input || empty($input['contenido'])) {
+                sendError('Contenido requerido', 400);
+            }
+            
+            $result = executeQuery(
+                "UPDATE Comentario SET contenido = ?, editado = TRUE, fechaEdicion = NOW() WHERE idComentario = ?",
+                [$input['contenido'], $id]
+            );
+            
+            if ($result !== false) {
+                sendResponse(null, 200, 'Comentario actualizado correctamente');
+            } else {
+                sendError('Error al actualizar comentario', 500);
+            }
+            break;
+        
+        case 'DELETE':
+            // Eliminar comentario (soft delete)
+            if (!isset($request[1])) {
+                sendError('ID de comentario requerido', 400);
+            }
+            
+            $id = (int)$request[1];
+            
+            // Verificar que el comentario existe y obtener su dueño
+            $comentario = executeSelect(
+                "SELECT idUsuario FROM Comentario WHERE idComentario = ?",
+                [$id]
+            );
+            
+            if (!$comentario) {
+                sendError('Comentario no encontrado', 404);
+            }
+            
+            // Solo el dueño o admin pueden eliminar
+            if ($currentUser['idUsuario'] != $comentario[0]['idUsuario'] && $currentUser['rol'] !== 'admin') {
+                sendError('No tienes permiso para eliminar este comentario', 403);
+            }
+            
+            $result = executeQuery(
+                "UPDATE Comentario SET activo = FALSE WHERE idComentario = ?",
+                [$id]
+            );
+            
+            if ($result !== false) {
+                sendResponse(null, 200, 'Comentario eliminado correctamente');
+            } else {
+                sendError('Error al eliminar comentario', 500);
+            }
+            break;
+        
         default:
             sendError('Método no permitido', 405);
+    }
+}
+
+/**
+ * Reportar comentario
+ */
+function handleReportarComentario($id, $input) {
+    $currentUser = requireAuth();
+    
+    if (!$id) {
+        sendError('ID de comentario requerido', 400);
+    }
+    
+    if (!$input || empty($input['motivo'])) {
+        sendError('Motivo del reporte requerido', 400);
+    }
+    
+    // Verificar que el comentario existe
+    $comentario = executeSelect(
+        "SELECT idComentario FROM Comentario WHERE idComentario = ?",
+        [$id]
+    );
+    
+    if (!$comentario) {
+        sendError('Comentario no encontrado', 404);
+    }
+    
+    // Verificar que no haya reportado antes
+    $existing = executeSelect(
+        "SELECT idReporte FROM ReporteComentario WHERE idComentario = ? AND idUsuarioReportador = ?",
+        [$id, $currentUser['idUsuario']]
+    );
+    
+    if ($existing) {
+        sendError('Ya reportaste este comentario', 409);
+    }
+    
+    // Crear reporte
+    $idReporte = executeQuery(
+        "INSERT INTO ReporteComentario (idComentario, idUsuarioReportador, motivo, descripcion) VALUES (?, ?, ?, ?)",
+        [$id, $currentUser['idUsuario'], $input['motivo'], $input['descripcion'] ?? null]
+    );
+    
+    if ($idReporte) {
+        // Marcar comentario como reportado
+        executeQuery(
+            "UPDATE Comentario SET reportado = TRUE WHERE idComentario = ?",
+            [$id]
+        );
+        sendResponse(['idReporte' => $idReporte], 201, 'Reporte creado correctamente');
+    } else {
+        sendError('Error al crear reporte', 500);
     }
 }
 
@@ -498,12 +1102,164 @@ function handleComentarios($method, $request, $input) {
  * Manejar operaciones de mundiales
  */
 function handleMundiales($method, $request, $input) {
+    // Requiere auth para POST, PUT, DELETE (solo admin)
+    $currentUser = null;
+    if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
+        $currentUser = requireAuth();
+        requireAdmin($currentUser);
+    }
+    
     switch ($method) {
         case 'GET':
-            $mundiales = executeSelect(
-                "SELECT * FROM Mundial ORDER BY anio DESC"
+            if (isset($request[1])) {
+                // Obtener mundial específico
+                $id = (int)$request[1];
+                $mundial = executeSelect(
+                    "SELECT * FROM Mundial WHERE idMundial = ?",
+                    [$id]
+                );
+                
+                if ($mundial) {
+                    sendResponse($mundial[0], 200, 'Mundial encontrado');
+                } else {
+                    sendError('Mundial no encontrado', 404);
+                }
+            } else {
+                // Obtener todos los mundiales
+                $mundiales = executeSelect(
+                    "SELECT * FROM Mundial ORDER BY anio DESC"
+                );
+                sendResponse($mundiales, 200, 'Mundiales obtenidos correctamente');
+            }
+            break;
+        
+        case 'POST':
+            // Crear mundial (solo admin)
+            if (!$input || empty($input['anio']) || empty($input['paisSede'])) {
+                sendError('Datos incompletos. Se requiere: anio, paisSede');
+            }
+            
+            $id = executeQuery(
+                "INSERT INTO Mundial (anio, paisSede, logo, nombreOficial, descripcion, fechaInicio, fechaFin, numeroEquipos, estado) 
+                 VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?)",
+                [
+                    $input['anio'],
+                    $input['paisSede'],
+                    $input['logo'] ?? null,
+                    $input['nombreOficial'] ?? null,
+                    $input['descripcion'] ?? null,
+                    $input['fechaInicio'] ?? null,
+                    $input['fechaFin'] ?? null,
+                    $input['numeroEquipos'] ?? 32,
+                    $input['estado'] ?? 'proximo'
+                ]
             );
-            sendResponse($mundiales, 200, 'Mundiales obtenidos correctamente');
+            
+            if ($id) {
+                sendResponse(['idMundial' => $id], 201, 'Mundial creado correctamente');
+            } else {
+                sendError('Error al crear mundial', 500);
+            }
+            break;
+        
+        case 'PUT':
+            // Actualizar mundial (solo admin)
+            if (!isset($request[1])) {
+                sendError('ID de mundial requerido', 400);
+            }
+            
+            $id = (int)$request[1];
+            
+            if (!$input) {
+                sendError('Datos requeridos para actualizar', 400);
+            }
+            
+            // Construir query dinámico
+            $updates = [];
+            $params = [];
+            
+            if (isset($input['anio'])) {
+                $updates[] = "anio = ?";
+                $params[] = $input['anio'];
+            }
+            if (isset($input['paisSede'])) {
+                $updates[] = "paisSede = ?";
+                $params[] = $input['paisSede'];
+            }
+            if (isset($input['logo'])) {
+                $updates[] = "logo = ?";
+                $params[] = $input['logo'];
+            }
+            if (isset($input['nombreOficial'])) {
+                $updates[] = "nombreOficial = ?";
+                $params[] = $input['nombreOficial'];
+            }
+            if (isset($input['descripcion'])) {
+                $updates[] = "descripcion = ?";
+                $params[] = $input['descripcion'];
+            }
+            if (isset($input['fechaInicio'])) {
+                $updates[] = "fechaInicio = ?";
+                $params[] = $input['fechaInicio'];
+            }
+            if (isset($input['fechaFin'])) {
+                $updates[] = "fechaFin = ?";
+                $params[] = $input['fechaFin'];
+            }
+            if (isset($input['numeroEquipos'])) {
+                $updates[] = "numeroEquipos = ?";
+                $params[] = $input['numeroEquipos'];
+            }
+            if (isset($input['estado'])) {
+                $updates[] = "estado = ?";
+                $params[] = $input['estado'];
+            }
+            
+            if (empty($updates)) {
+                sendError('No hay campos para actualizar', 400);
+            }
+            
+            $params[] = $id;
+            $result = executeQuery(
+                "UPDATE Mundial SET " . implode(', ', $updates) . " WHERE idMundial = ?",
+                $params
+            );
+            
+            if ($result !== false) {
+                sendResponse(null, 200, 'Mundial actualizado correctamente');
+            } else {
+                sendError('Error al actualizar mundial', 500);
+            }
+            break;
+        
+        case 'DELETE':
+            // Eliminar mundial (solo admin)
+            if (!isset($request[1])) {
+                sendError('ID de mundial requerido', 400);
+            }
+            
+            $id = (int)$request[1];
+            
+            // Verificar si tiene publicaciones asociadas
+            $publicaciones = executeSelect(
+                "SELECT COUNT(*) as total FROM Publicacion WHERE idMundial = ?",
+                [$id]
+            );
+            
+            if ($publicaciones && $publicaciones[0]['total'] > 0) {
+                sendError('No se puede eliminar el mundial porque tiene publicaciones asociadas', 409);
+            }
+            
+            $result = executeQuery(
+                "DELETE FROM Mundial WHERE idMundial = ?",
+                [$id]
+            );
+            
+            if ($result !== false) {
+                sendResponse(null, 200, 'Mundial eliminado correctamente');
+            } else {
+                sendError('Error al eliminar mundial', 500);
+            }
             break;
         
         default:
@@ -515,12 +1271,128 @@ function handleMundiales($method, $request, $input) {
  * Manejar operaciones de categorías
  */
 function handleCategorias($method, $request, $input) {
+    // Requiere auth para POST, PUT, DELETE (solo admin)
+    $currentUser = null;
+    if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
+        $currentUser = requireAuth();
+        requireAdmin($currentUser);
+    }
+    
     switch ($method) {
         case 'GET':
-            $categorias = executeSelect(
-                "SELECT * FROM Categoria WHERE activa = TRUE ORDER BY nombre ASC"
+            if (isset($request[1])) {
+                // Obtener categoría específica
+                $id = (int)$request[1];
+                $categoria = executeSelect(
+                    "SELECT * FROM Categoria WHERE idCategoria = ?",
+                    [$id]
+                );
+                
+                if ($categoria) {
+                    sendResponse($categoria[0], 200, 'Categoría encontrada');
+                } else {
+                    sendError('Categoría no encontrada', 404);
+                }
+            } else {
+                // Obtener todas las categorías activas
+                $categorias = executeSelect(
+                    "SELECT * FROM Categoria WHERE activa = TRUE ORDER BY nombre ASC"
+                );
+                sendResponse($categorias, 200, 'Categorías obtenidas correctamente');
+            }
+            break;
+        
+        case 'POST':
+            // Crear categoría (solo admin)
+            if (!$input || empty($input['nombre'])) {
+                sendError('Datos incompletos. Se requiere: nombre');
+            }
+            
+            $id = executeQuery(
+                "INSERT INTO Categoria (nombre, descripcion, color) VALUES (?, ?, ?)",
+                [
+                    $input['nombre'],
+                    $input['descripcion'] ?? null,
+                    $input['color'] ?? '#000000'
+                ]
             );
-            sendResponse($categorias, 200, 'Categorías obtenidas correctamente');
+            
+            if ($id) {
+                sendResponse(['idCategoria' => $id], 201, 'Categoría creada correctamente');
+            } else {
+                sendError('Error al crear categoría', 500);
+            }
+            break;
+        
+        case 'PUT':
+            // Actualizar categoría (solo admin)
+            if (!isset($request[1])) {
+                sendError('ID de categoría requerido', 400);
+            }
+            
+            $id = (int)$request[1];
+            
+            if (!$input) {
+                sendError('Datos requeridos para actualizar', 400);
+            }
+            
+            // Construir query dinámico
+            $updates = [];
+            $params = [];
+            
+            if (isset($input['nombre'])) {
+                $updates[] = "nombre = ?";
+                $params[] = $input['nombre'];
+            }
+            if (isset($input['descripcion'])) {
+                $updates[] = "descripcion = ?";
+                $params[] = $input['descripcion'];
+            }
+            if (isset($input['color'])) {
+                $updates[] = "color = ?";
+                $params[] = $input['color'];
+            }
+            if (isset($input['activa'])) {
+                $updates[] = "activa = ?";
+                $params[] = $input['activa'];
+            }
+            
+            if (empty($updates)) {
+                sendError('No hay campos para actualizar', 400);
+            }
+            
+            $params[] = $id;
+            $result = executeQuery(
+                "UPDATE Categoria SET " . implode(', ', $updates) . " WHERE idCategoria = ?",
+                $params
+            );
+            
+            if ($result !== false) {
+                sendResponse(null, 200, 'Categoría actualizada correctamente');
+            } else {
+                sendError('Error al actualizar categoría', 500);
+            }
+            break;
+        
+        case 'DELETE':
+            // Desactivar categoría (solo admin)
+            if (!isset($request[1])) {
+                sendError('ID de categoría requerido', 400);
+            }
+            
+            $id = (int)$request[1];
+            
+            // Soft delete - solo desactivar
+            $result = executeQuery(
+                "UPDATE Categoria SET activa = FALSE WHERE idCategoria = ?",
+                [$id]
+            );
+            
+            if ($result !== false) {
+                sendResponse(null, 200, 'Categoría desactivada correctamente');
+            } else {
+                sendError('Error al desactivar categoría', 500);
+            }
             break;
         
         default:

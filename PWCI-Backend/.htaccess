@@ -22,11 +22,12 @@ AddType application/json .json
 AddDefaultCharset utf-8
 
 #Configurar caché para archivos estáticos (requiere mod_expires)
-<FilesMatch ".(css|js|png|jpg|jpeg|gif|ico|svg)$">
-ExpiresActive On
-ExpiresDefault "access plus 1 month"
-</FilesMatch>
-Proteger archivos sensibles
+#<FilesMatch ".(css|js|png|jpg|jpeg|gif|ico|svg)$">
+#ExpiresActive On
+#ExpiresDefault "access plus 1 month"
+#</FilesMatch>
+
+# Proteger archivos sensibles
 <Files "database.php">
     Require all denied
 </Files>
