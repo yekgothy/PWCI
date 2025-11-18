@@ -84,4 +84,76 @@ function executeQuery($query, $params = []) {
         return false;
     }
 }
+
+/**
+ * Ejecutar un Stored Procedure que devuelve datos (SELECT)
+ * @param string $procedureName Nombre del SP (ej: 'sp_obtener_categorias')
+ * @param array $params Parámetros del SP
+ * @return array|false Array de resultados o false si falla
+ */
+function callStoredProcedure($procedureName, $params = []) {
+    try {
+        $pdo = getDBConnection();
+        if (!$pdo) return false;
+
+        // Construir CALL con placeholders
+        $placeholders = implode(',', array_fill(0, count($params), '?'));
+        $sql = "CALL $procedureName($placeholders)";
+        
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute($params);
+        
+        $results = $stmt->fetchAll(PDO::FETCH_ASSOC);
+        
+        // Cerrar el cursor para limpiar
+        $stmt->closeCursor();
+        
+        return $results;
+        
+    } catch (PDOException $e) {
+        error_log("Error en callStoredProcedure ($procedureName): " . $e->getMessage());
+        return false;
+    }
+}
+
+/**
+ * Ejecutar un Stored Procedure que modifica datos (INSERT/UPDATE/DELETE)
+ * Devuelve el ID insertado o true/false
+ * @param string $procedureName Nombre del SP
+ * @param array $params Parámetros del SP
+ * @return int|bool ID insertado o true/false
+ */
+function executeSP($procedureName, $params = []) {
+    try {
+        $pdo = getDBConnection();
+        if (!$pdo) return false;
+
+        // Construir CALL con placeholders
+        $placeholders = implode(',', array_fill(0, count($params), '?'));
+        $sql = "CALL $procedureName($placeholders)";
+        
+        $stmt = $pdo->prepare($sql);
+        $result = $stmt->execute($params);
+        
+        // Intentar obtener el ID si el SP devuelve un resultado
+        $row = $stmt->fetch(PDO::FETCH_ASSOC);
+        
+        // Cerrar cursor
+        $stmt->closeCursor();
+        
+        if ($row) {
+            // Si el SP devolvió algo, buscar un ID
+            $firstValue = reset($row);
+            if (is_numeric($firstValue)) {
+                return (int)$firstValue;
+            }
+        }
+        
+        return $result;
+        
+    } catch (PDOException $e) {
+        error_log("Error en executeSP ($procedureName): " . $e->getMessage());
+        return false;
+    }
+}
 ?>

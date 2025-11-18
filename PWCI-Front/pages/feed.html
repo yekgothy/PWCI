@@ -12,10 +12,10 @@
     <div id="navbar"></div>
 
     <!-- MAIN LAYOUT -->
-    <div class="min-h-screen pt-16 flex">
+    <div class="min-h-screen pt-16 md:pt-0 flex">
         <!-- SIDEBAR IZQUIERDO (fijo) -->
-        <aside class="hidden md:block w-64 fixed left-0 top-16 bottom-0 border-r border-zinc-800">
-            <div id="sidebar-left-container" class="h-[calc(100vh-4rem)] overflow-y-auto flex flex-col">
+        <aside class="hidden md:block w-64 fixed left-0 top-0 bottom-0 border-r border-zinc-800">
+            <div id="sidebar-left-container" class="h-screen overflow-y-auto flex flex-col">
             </div>
         </aside>
 
@@ -25,8 +25,8 @@
         </main>
 
         <!-- SIDEBAR DERECHO (fijo) -->
-        <aside class="hidden lg:block w-80 fixed right-0 top-16 bottom-0 border-l border-zinc-800">
-            <div id="sidebar-right-container" class="h-[calc(100vh-4rem)] overflow-y-auto flex flex-col"></div>
+        <aside class="hidden lg:block w-80 fixed right-0 top-0 bottom-0 border-l border-zinc-800">
+            <div id="sidebar-right-container" class="h-screen overflow-y-auto flex flex-col"></div>
         </aside>
     </div>
 
@@ -124,10 +124,15 @@
         .then(() => {
             console.log('Todos los componentes cargados exitosamente');
             
-            // Inicializar navbar después de que todo esté cargado
+            // Inicializar navbar y sidebar después de que todo esté cargado
             setTimeout(() => {
                 initializeNavbar();
                 initUserInterface();
+                
+                // Inicializar sidebar usando el controlador compartido
+                if (typeof initSidebar === 'function') {
+                    initSidebar();
+                }
             }, 200);
         })
         .catch(error => {
@@ -147,9 +152,6 @@
             
             // Actualizar Navbar
             updateNavbar(userData, isAuth);
-            
-            // Actualizar Sidebar
-            updateSidebar(userData, isAuth);
         }
         
         // Obtener datos del usuario
@@ -243,6 +245,10 @@
             }
         }
     </script>
+    
+    <!-- Scripts -->
+    <script src="../controllers/sidebar.js"></script>
+    <script src="../controllers/feed.js"></script>
 
 </body>
 </html>

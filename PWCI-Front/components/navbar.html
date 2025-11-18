@@ -1,5 +1,6 @@
 
-<header class="bg-black text-white fixed top-0 left-0 right-0 z-50 shadow-lg" style="box-shadow: 0 4px 6px -1px rgba(255, 255, 255, 0.1), 0 2px 4px -1px rgba(255, 255, 255, 0.06);">
+<!-- Navbar: visible siempre en landing, solo móvil en otras páginas -->
+<header id="mainNavbar" class="md:hidden bg-black text-white fixed top-0 left-0 right-0 z-50 shadow-lg" style="box-shadow: 0 4px 6px -1px rgba(255, 255, 255, 0.1), 0 2px 4px -1px rgba(255, 255, 255, 0.06);">
   <div class="max-w-7xl mx-auto px-6 py-3 flex items-center">
     <!-- Left Side Menu -->
     <div class="w-48 flex justify-start">
@@ -92,3 +93,13 @@
   
 
 </header>
+
+<script>
+  // Si estamos en landing page, mostrar navbar en todas las resoluciones
+  if (document.querySelector('.landing-navbar')) {
+    const navbar = document.getElementById('mainNavbar');
+    if (navbar) {
+      navbar.classList.remove('md:hidden');
+    }
+  }
+</script>

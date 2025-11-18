@@ -1,123 +1,213 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Detalles de Perfil - World Cup Hub</title>
-  <script src="https://cdn.tailwindcss.com"></script>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mi Perfil - World Cup Hub</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Skeleton loading animation */
+        @keyframes shimmer {
+            0% { background-position: -1000px 0; }
+            100% { background-position: 1000px 0; }
+        }
+        .skeleton {
+            animation: shimmer 2s infinite;
+            background: linear-gradient(to right, #f0f0f0 4%, #e0e0e0 25%, #f0f0f0 36%);
+            background-size: 1000px 100%;
+        }
+    </style>
 </head>
-<body class="text-gray-800 font-sans pt-16 bg-cover bg-center bg-no-repeat bg-fixed min-h-screen" style="background-image: url('../public/bgProfileDetails.png')">
+<body class="font-sans text-neutral-900" style="background: url('../public/bgFeed.png') center/cover no-repeat fixed;">
 
-  <!-- NAVBAR COMPONENT -->
-  <div id="navbar"></div>
+    <!-- NAVBAR COMPONENT -->
+    <div id="navbar"></div>
 
-  <!-- MAIN CONTENT -->
-  <main class="py-12 min-h-screen">
-    <div class="max-w-4xl mx-auto px-6">
-      <!-- Header Section -->
-      <div class="bg-black rounded-lg shadow-md p-8 mb-8" style="box-shadow: 0 4px 6px -1px rgba(255, 255, 255, 0.1), 0 2px 4px -1px rgba(255, 255, 255, 0.06);">
-        <div class="flex items-center justify-between">
-          <div class="flex items-center">
+    <!-- MAIN LAYOUT -->
+    <div class="min-h-screen pt-16 md:pt-0 flex">
+        <!-- SIDEBAR IZQUIERDO (fijo) -->
+        <aside class="hidden md:block w-64 fixed left-0 top-0 bottom-0 border-r border-zinc-800">
+            <div id="sidebar-left-container" class="h-screen overflow-y-auto flex flex-col">
+            </div>
+        </aside>
+
+        <!-- CONTENIDO PRINCIPAL -->
+        <main class="flex-1 w-full md:ml-64 lg:mr-80 px-4 md:px-8 lg:px-12 py-8">
             
-            <div>
-              <h1 class="text-3xl font-bold text-white">Detalles de Perfil</h1>
-              <p class="text-gray-300">Administra tu información personal</p>
-            </div>
-          </div>
-          <div class="text-right">
-            <img 
-              src="https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?ixlib=rb-4.0.3&ixid=M3wxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8fA%3D%3D&auto=format&fit=crop&w=880&q=80" 
-              alt="Foto de Perfil" 
-              class="w-20 h-20 rounded-full object-cover border-4 border-gray-200 shadow-lg mx-auto mb-2"
-            >
-            <p class="text-sm font-medium text-white">Jose Ernesto Macias Sampablo</p>
-          </div>
-        </div>
-      </div>
+            <!-- Profile Header -->
+            <div class="bg-white rounded-xl shadow-lg p-6 mb-6 border border-neutral-200">
+                <div class="flex flex-col md:flex-row items-center md:items-start gap-6">
+                    <!-- Profile Photo -->
+                    <div class="relative">
+                        <div id="profilePhoto" class="w-24 h-24 rounded-full overflow-hidden bg-black flex items-center justify-center text-white text-3xl font-bold shadow-lg border-4 border-neutral-800">
+                            <span id="profileInitials"></span>
+                        </div>
+                    </div>
 
-      <!-- Profile Form -->
-      <div class="bg-white rounded-lg shadow-md p-8">
-        
-        <form class="space-y-6">
-          <div>
-            <label class="block text-gray-700 text-sm mb-2">Nombre Completo</label>
-            <input 
-              type="text" 
-              value="Charles Emmerson" 
-              class="w-full px-4 py-3 bg-gray-50 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-          </div>
+                    <!-- Profile Info -->
+                    <div class="flex-1 text-center md:text-left">
+                        <h1 id="profileName" class="text-3xl font-bold text-black mb-2">Cargando...</h1>
+                        <p id="profileEmail" class="text-neutral-600 mb-4">Cargando...</p>
+                        <a href="createPost.html" class="inline-block bg-black hover:bg-neutral-800 text-white px-6 py-2 rounded-lg transition-colors font-semibold">
+                            + Nueva Publicación
+                        </a>
+                    </div>
+                </div>
+            </div>
 
-          <div class="grid md:grid-cols-2 md:gap-6">
-            <div>
-              <label class="block text-gray-700 text-sm mb-2">Fecha de nacimiento</label>
-              <input 
-                type="date"
-                value="1990-05-15"
-                class="w-full px-4 py-3 bg-gray-50 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-              >
-            </div>
-            <div>
-              <label class="block text-gray-700 text-sm mb-2">Género</label>
-              <select class="w-full px-4 py-3 bg-gray-50 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option>Masculino</option>
-                <option>Femenino</option>
-                <option>Otro</option>
-                <option>Prefiero no decirlo</option>
-              </select>
-            </div>
-          </div>
-          
-          <div class="grid md:grid-cols-2 md:gap-6">
-            <div>
-              <label class="block text-gray-700 text-sm mb-2">País de nacimiento</label>
-              <select class="w-full px-4 py-3 bg-gray-50 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option>México</option>
-                <option>Estados Unidos</option>
-                <option>Canadá</option>
-                <option>España</option>
-              </select>
-            </div>
-            <div>
-              <label class="block text-gray-700 text-sm mb-2">Nacionalidad</label>
-              <select class="w-full px-4 py-3 bg-gray-50 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500">
-                <option>Mexicana</option>
-                <option>Estadounidense</option>
-                <option>Canadiense</option>
-                <option>Española</option>
-              </select>
-            </div>
-          </div>
+            <!-- Statistics Cards -->
+            <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 mb-6">
+                <!-- Total Posts -->
+                <div class="bg-white rounded-xl shadow-lg p-4 border border-neutral-200">
+                    <div class="text-neutral-600 text-sm mb-1">Total Posts</div>
+                    <div id="statTotalPosts" class="text-3xl font-bold text-black">0</div>
+                </div>
 
-          <div>
-            <label class="block text-gray-700 text-sm mb-2">Correo Electrónico</label>
-            <input 
-              type="email" 
-              value="charles@comet.co" 
-              class="w-full px-4 py-3 bg-gray-50 text-gray-800 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-          </div>
-          
-          <button 
-            type="submit" 
-            class="w-full py-3 bg-gradient-to-r from-black to-gray-800 text-white font-semibold rounded-lg hover:from-gray-900 hover:to-gray-700 transition-all duration-300 shadow-md mt-4"
-          >
-            Guardar Cambios
-          </button>
-        </form>
-      </div>
+                <!-- Aprobadas -->
+                <div class="bg-white rounded-xl shadow-lg p-4 border border-neutral-200">
+                    <div class="text-neutral-600 text-sm mb-1">Aprobadas</div>
+                    <div id="statAprobadas" class="text-3xl font-bold text-black">0</div>
+                </div>
+
+                <!-- Pendientes -->
+                <div class="bg-white rounded-xl shadow-lg p-4 border border-neutral-200">
+                    <div class="text-neutral-600 text-sm mb-1">Pendientes</div>
+                    <div id="statPendientes" class="text-3xl font-bold text-black">0</div>
+                </div>
+
+                <!-- Rechazadas -->
+                <div class="bg-white rounded-xl shadow-lg p-4 border border-neutral-200">
+                    <div class="text-neutral-600 text-sm mb-1">Rechazadas</div>
+                    <div id="statRechazadas" class="text-3xl font-bold text-red-600">0</div>
+                </div>
+
+                <!-- Total Likes -->
+                <div class="bg-white rounded-xl shadow-lg p-4 border border-neutral-200">
+                    <div class="text-neutral-600 text-sm mb-1">Total Likes</div>
+                    <div id="statLikes" class="text-3xl font-bold text-black">0</div>
+                </div>
+
+                <!-- Comentarios -->
+                <div class="bg-white rounded-xl shadow-lg p-4 border border-neutral-200">
+                    <div class="text-neutral-600 text-sm mb-1">Comentarios</div>
+                    <div id="statComentarios" class="text-3xl font-bold text-black">0</div>
+                </div>
+            </div>
+
+            <!-- Filter Tabs -->
+            <div class="bg-black rounded-xl shadow-lg mb-6 border border-neutral-800">
+                <div class="border-b border-neutral-800 px-4">
+                    <nav class="flex space-x-8">
+                        <button onclick="changeFilter('todas')" data-filter="todas" class="filter-tab py-3 px-1 border-b-2 border-white text-white font-medium hover:text-neutral-300">
+                            Todas <span id="countTodas" class="ml-1">(0)</span>
+                        </button>
+                        <button onclick="changeFilter('aprobada')" data-filter="aprobada" class="filter-tab py-3 px-1 border-b-2 border-transparent text-neutral-400 hover:text-white">
+                            Aprobadas <span id="countAprobadas" class="ml-1">(0)</span>
+                        </button>
+                        <button onclick="changeFilter('pendiente')" data-filter="pendiente" class="filter-tab py-3 px-1 border-b-2 border-transparent text-neutral-400 hover:text-white">
+                            Pendientes <span id="countPendientes" class="ml-1">(0)</span>
+                        </button>
+                        <button onclick="changeFilter('rechazada')" data-filter="rechazada" class="filter-tab py-3 px-1 border-b-2 border-transparent text-neutral-400 hover:text-white">
+                            Rechazadas <span id="countRechazadas" class="ml-1">(0)</span>
+                        </button>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Posts Container -->
+            <div id="postsContainer" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <!-- Loading skeleton -->
+                <div class="bg-white rounded-xl shadow-md border border-neutral-200 p-4 skeleton">
+                    <div class="h-48 bg-neutral-200 rounded-lg mb-4"></div>
+                    <div class="h-4 bg-neutral-200 rounded mb-2"></div>
+                    <div class="h-4 bg-neutral-200 rounded w-3/4"></div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md border border-neutral-200 p-4 skeleton">
+                    <div class="h-48 bg-neutral-200 rounded-lg mb-4"></div>
+                    <div class="h-4 bg-neutral-200 rounded mb-2"></div>
+                    <div class="h-4 bg-neutral-200 rounded w-3/4"></div>
+                </div>
+                <div class="bg-white rounded-xl shadow-md border border-neutral-200 p-4 skeleton">
+                    <div class="h-48 bg-neutral-200 rounded-lg mb-4"></div>
+                    <div class="h-4 bg-neutral-200 rounded mb-2"></div>
+                    <div class="h-4 bg-neutral-200 rounded w-3/4"></div>
+                </div>
+            </div>
+
+        </main>
+
+        <!-- SIDEBAR DERECHO (fijo) -->
+        <aside class="hidden lg:block w-80 fixed right-0 top-0 bottom-0 border-l border-zinc-800">
+            <div id="sidebar-right-container" class="h-screen overflow-y-auto flex flex-col"></div>
+        </aside>
     </div>
-    
-   
-    
-  </div>
-  </main>
 
-  <!-- FOOTER COMPONENT -->
-  <div id="footer"></div>
+    <!-- Scripts: Cargar primero los controllers -->
+    <script src="../controllers/profile.js"></script>
+    <script src="../controllers/sidebar.js"></script>
 
-  <!-- JavaScript para cargar componentes -->
-  <script src="../controllers/navbar.js"></script>
-  <script src="../controllers/home.js"></script>
+    <!-- JavaScript para cargar componentes -->
+    <script>
+        // Función para inicializar el navbar
+        function initializeNavbar() {
+            const menuButton = document.getElementById('menuButton');
+            const sidebarMenu = document.getElementById('sidebarMenu');
+            const closeMenuButton = document.getElementById('closeMenuButton');
+            const menuOverlay = document.getElementById('menuOverlay');
+
+            if (menuButton && sidebarMenu) {
+                // Abrir menú hamburguesa
+                menuButton.addEventListener('click', function() {
+                    sidebarMenu.classList.remove('hidden');
+                });
+
+                // Cerrar menú con botón X
+                if (closeMenuButton) {
+                    closeMenuButton.addEventListener('click', function() {
+                        sidebarMenu.classList.add('hidden');
+                    });
+                }
+
+                // Cerrar menú con overlay
+                if (menuOverlay) {
+                    menuOverlay.addEventListener('click', function() {
+                        sidebarMenu.classList.add('hidden');
+                    });
+                }
+            }
+        }
+
+        // Cargar navbar
+        fetch('../components/navbar.html?v=2')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('navbar').innerHTML = data;
+                initializeNavbar();
+            })
+            .catch(error => console.error('Error cargando navbar:', error));
+
+        // Cargar sidebar izquierdo
+        fetch('../components/sidebarFeed1.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('sidebar-left-container').innerHTML = data;
+                // Inicializar info del usuario en sidebar después de cargarlo
+                setTimeout(() => {
+                    if (typeof initSidebarUserInfo === 'function') {
+                        initSidebarUserInfo();
+                    }
+                }, 100);
+            })
+            .catch(error => console.error('Error cargando sidebar izquierdo:', error));
+
+        // Cargar sidebar derecho
+        fetch('../components/sidebarFeed2.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('sidebar-right-container').innerHTML = data;
+            })
+            .catch(error => console.error('Error cargando sidebar derecho:', error));
+    </script>
+
 </body>
 </html>

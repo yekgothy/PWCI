@@ -117,7 +117,8 @@
 
 <body class="bg-zinc-900 text-white font-sans pt-16">
 
-    <div id="navbar"></div>
+    <!-- Navbar siempre visible en landing page -->
+    <div id="navbar" class="landing-navbar"></div>
 
     <main>
 
@@ -255,6 +256,21 @@
     <script src="../controllers/home.js"></script>
 
     <script>
+        // Cargar navbar
+        fetch('../components/navbar.html')
+            .then(response => response.text())
+            .then(data => {
+                document.getElementById('navbar').innerHTML = data;
+                
+                // Forzar que el navbar sea visible en landing page
+                setTimeout(() => {
+                    const navbar = document.getElementById('mainNavbar');
+                    if (navbar) {
+                        navbar.classList.remove('md:hidden');
+                    }
+                }, 100);
+            });
+        
         // Esperar a que el DOM esté completamente cargado
         document.addEventListener('DOMContentLoaded', function() {
             console.log('GSAP cargado:', typeof gsap !== 'undefined');

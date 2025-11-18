@@ -1,33 +1,33 @@
-<div class="p-6 flex flex-col h-screen bg-black">
-    <div class="mb-10 text-center">
-        <img src="../public/LogoFifa.svg" alt="FIFA Logo" class="h-12 w-auto mx-auto mb-4">
-        <h1 class="text-2xl font-bold text-white">World Cup Hub</h1>
+<div class="p-6 flex flex-col h-screen bg-black overflow-y-auto">
+    <div class="mb-6 text-center">
+        <img src="../public/LogoFifa.svg" alt="FIFA Logo" class="h-10 w-auto mx-auto mb-3">
+        <h1 class="text-xl font-bold text-white">World Cup Hub</h1>
     </div>
 
-    <nav class="flex-1">
+    <nav class="flex-1 overflow-y-auto">
         <ul class="space-y-2">
             <li>
-                <a href="../pages/feed.html" class="block p-3 rounded-lg bg-zinc-800 text-white font-semibold">Feed Principal</a>
+                <a href="../pages/landingPage.html" class="block p-3 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors">Inicio</a>
+            </li>
+            <li>
+                <a href="../pages/home.html" class="block p-3 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors">Noticias Oficiales FIFA</a>
+            </li>
+            <li>
+                <a href="../pages/feed.html" class="block p-3 rounded-lg bg-zinc-800 text-white font-semibold">WCH HUB Feed</a>
             </li>
             <li>
                 <a href="../pages/createPost.html" class="block p-3 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors">Crear Post</a>
             </li>
             <li>
-                <a href="../pages/home.html" class="block p-3 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors">Feed Oficial FIFA</a>
-            </li>
-            <li>
-                <a href="../pages/landingPage.html" class="block p-3 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors">Inicio</a>
-            </li>
-            <li>
-                <a href="../admin/adminPanel.html" class="block p-3 rounded-lg text-yellow-400 hover:bg-zinc-800 hover:text-yellow-300 transition-colors">Admin Panel</a>
+                <a href="../admin/adminPanel.html" class="block p-3 rounded-lg text-yellow-400 hover:bg-zinc-800 hover:text-yellow-300 transition-colors">Panel Admin</a>
             </li>
         </ul>
     </nav>
 
-    <div class="mt-auto border-t border-zinc-800 pt-6">
-        <a href="../pages/profileDetails.html" class="flex items-center p-3 rounded-lg hover:bg-zinc-800 transition-colors cursor-pointer">
-            <div class="w-10 h-10 bg-zinc-700 rounded-full flex items-center justify-center">
-                <span id="sidebarUserInitials" class="text-white font-semibold text-lg"></span>
+    <div class="mt-auto border-t border-zinc-800 pt-4 flex-shrink-0">
+        <a href="../pages/profileDetails.html" class="flex items-center p-2 rounded-lg hover:bg-zinc-800 transition-colors cursor-pointer">
+            <div class="w-9 h-9 bg-zinc-700 rounded-full flex items-center justify-center">
+                <span id="sidebarUserInitials" class="text-white font-semibold text-sm"></span>
             </div>
             <div class="ml-3">
                 <p id="sidebarUserName" class="font-semibold text-white text-sm">Mi Perfil</p>
@@ -36,8 +36,8 @@
         </a>
         
         <!-- Botón de Cerrar Sesión -->
-        <button id="sidebarLogoutButton" class="w-full mt-3 p-3 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium text-sm transition-colors flex items-center justify-center">
-            <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+        <button id="sidebarLogoutButton" class="w-full mt-2 p-2 rounded-lg bg-red-600 hover:bg-red-700 text-white font-medium text-sm transition-colors flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-2" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
             </svg>
             Cerrar Sesión

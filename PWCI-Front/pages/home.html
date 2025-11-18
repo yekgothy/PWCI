@@ -12,14 +12,14 @@
   <div id="navbar"></div>
 
   <!-- MAIN CONTENT -->
-  <main class="min-h-screen pt-16">
+  <main class="min-h-screen pt-16 md:pt-0">
     <div class="flex max-w-7xl mx-auto">
       
       <!-- LEFT SIDEBAR -->
-      <div class="w-72 fixed left-0 top-16 h-[calc(100vh-4rem)] overflow-y-auto" id="sidebarFeed1"></div>
+      <div class="w-72 fixed left-0 top-0 h-screen overflow-y-auto hidden md:block" id="sidebarFeed1"></div>
       
       <!-- CENTER CONTENT -->
-      <div class="flex-1 ml-72 mr-72 px-6 py-8">
+      <div class="flex-1 md:ml-72 md:mr-72 px-6 py-8">
         <div class="max-w-4xl mx-auto">
           
           <!-- HERO SECTION -->
@@ -276,7 +276,7 @@
       </div>
       
       <!-- RIGHT SIDEBAR -->
-      <div class="w-72 fixed right-0 top-16 h-[calc(100vh-4rem)] overflow-y-auto" id="sidebarFeed2"></div>
+      <div class="w-72 fixed right-0 top-0 h-screen overflow-y-auto hidden lg:block" id="sidebarFeed2"></div>
 
     </div>
   </main>

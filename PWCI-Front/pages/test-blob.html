@@ -1,0 +1,237 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test BLOB - Subir Imágenes</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-neutral-50 text-neutral-900">
+    
+    <div class="min-h-screen py-12 px-4">
+        <div class="max-w-4xl mx-auto">
+            
+            <!-- Header -->
+            <div class="mb-8">
+                <h1 class="text-3xl font-bold mb-2">Sistema BLOB - Prueba de Imágenes</h1>
+                <p class="text-neutral-600">Prueba la subida y descarga de imágenes almacenadas como BLOB en la base de datos</p>
+            </div>
+
+            <!-- Test 1: Subir foto de perfil -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <h2 class="text-xl font-bold mb-4">1. Subir Foto de Perfil</h2>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">ID de Usuario:</label>
+                    <input type="number" id="userId" class="w-full px-3 py-2 border border-neutral-300 rounded-lg" placeholder="Ej: 1">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Seleccionar imagen:</label>
+                    <input type="file" id="userPhotoInput" accept="image/*" class="w-full px-3 py-2 border border-neutral-300 rounded-lg">
+                </div>
+
+                <div class="mb-4">
+                    <img id="userPhotoPreview" src="" alt="Preview" class="w-32 h-32 object-cover rounded-full border-2 border-neutral-300 hidden">
+                </div>
+
+                <button onclick="testUploadUserPhoto()" class="bg-black text-white px-6 py-2 rounded-lg hover:bg-neutral-800">
+                    Subir Foto de Usuario
+                </button>
+
+                <div id="userPhotoResult" class="mt-4 p-3 rounded-lg hidden"></div>
+            </div>
+
+            <!-- Test 2: Subir multimedia de publicación -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <h2 class="text-xl font-bold mb-4">2. Subir Multimedia de Publicación</h2>
+                
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">ID de Publicación:</label>
+                    <input type="number" id="postId" class="w-full px-3 py-2 border border-neutral-300 rounded-lg" placeholder="Ej: 1">
+                </div>
+
+                <div class="mb-4">
+                    <label class="block text-sm font-medium mb-2">Seleccionar imagen:</label>
+                    <input type="file" id="postMediaInput" accept="image/*" class="w-full px-3 py-2 border border-neutral-300 rounded-lg">
+                </div>
+
+                <div class="mb-4">
+                    <img id="postMediaPreview" src="" alt="Preview" class="w-full h-48 object-cover rounded-lg border-2 border-neutral-300 hidden">
+                </div>
+
+                <button onclick="testUploadPostMedia()" class="bg-black text-white px-6 py-2 rounded-lg hover:bg-neutral-800">
+                    Subir Multimedia
+                </button>
+
+                <div id="postMediaResult" class="mt-4 p-3 rounded-lg hidden"></div>
+            </div>
+
+            <!-- Test 3: Ver imágenes -->
+            <div class="bg-white rounded-xl shadow-md p-6 mb-6">
+                <h2 class="text-xl font-bold mb-4">3. Ver Imágenes Almacenadas</h2>
+                
+                <div class="grid grid-cols-2 gap-4">
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Ver foto de usuario (ID):</label>
+                        <div class="flex gap-2">
+                            <input type="number" id="viewUserId" class="flex-1 px-3 py-2 border border-neutral-300 rounded-lg" placeholder="ID">
+                            <button onclick="testViewUserPhoto()" class="bg-black text-white px-4 py-2 rounded-lg hover:bg-neutral-800">Ver</button>
+                        </div>
+                        <div class="mt-3">
+                            <img id="viewUserPhoto" src="" alt="User Photo" class="w-32 h-32 object-cover rounded-full border-2 border-neutral-300 hidden">
+                        </div>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-medium mb-2">Ver multimedia de publicación (ID):</label>
+                        <div class="flex gap-2">
+                            <input type="number" id="viewPostId" class="flex-1 px-3 py-2 border border-neutral-300 rounded-lg" placeholder="ID">
+                            <button onclick="testViewPostMedia()" class="bg-black text-white px-4 py-2 rounded-lg hover:bg-neutral-800">Ver</button>
+                        </div>
+                        <div class="mt-3">
+                            <img id="viewPostMedia" src="" alt="Post Media" class="w-full h-48 object-cover rounded-lg border-2 border-neutral-300 hidden">
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Instrucciones -->
+            <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
+                <h3 class="font-bold mb-2">📝 Instrucciones:</h3>
+                <ol class="list-decimal list-inside space-y-1 text-sm">
+                    <li>Asegúrate de estar autenticado (tener token en localStorage)</li>
+                    <li>Ingresa un ID de usuario o publicación válido</li>
+                    <li>Selecciona una imagen (JPG, PNG, GIF o WEBP)</li>
+                    <li>Haz clic en "Subir" para enviar la imagen al servidor</li>
+                    <li>La imagen se almacenará como BLOB en la base de datos</li>
+                    <li>Usa la sección "Ver Imágenes" para recuperar las imágenes almacenadas</li>
+                </ol>
+            </div>
+
+        </div>
+    </div>
+
+    <script src="../controllers/blob-utils.js"></script>
+    <script>
+        const IMAGEN_API = 'http://localhost/PWCI/PWCI-Backend/imagen-api.php';
+
+        // Preview de imagen de usuario
+        document.getElementById('userPhotoInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const preview = document.getElementById('userPhotoPreview');
+            if (file) {
+                previewImage(file, preview);
+                preview.classList.remove('hidden');
+            }
+        });
+
+        // Preview de multimedia de publicación
+        document.getElementById('postMediaInput').addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            const preview = document.getElementById('postMediaPreview');
+            if (file) {
+                previewImage(file, preview);
+                preview.classList.remove('hidden');
+            }
+        });
+
+        // Test subir foto de usuario
+        async function testUploadUserPhoto() {
+            const userId = document.getElementById('userId').value;
+            const fileInput = document.getElementById('userPhotoInput');
+            const result = document.getElementById('userPhotoResult');
+
+            if (!userId || !fileInput.files[0]) {
+                showResult(result, 'Por favor ingresa un ID de usuario y selecciona una imagen', 'error');
+                return;
+            }
+
+            const validation = validateImageFile(fileInput.files[0]);
+            if (!validation.valid) {
+                showResult(result, validation.error, 'error');
+                return;
+            }
+
+            try {
+                const response = await uploadUserPhoto(userId, fileInput.files[0]);
+                showResult(result, 'Foto subida correctamente: ' + JSON.stringify(response), 'success');
+            } catch (error) {
+                showResult(result, 'Error: ' + error.message, 'error');
+            }
+        }
+
+        // Test subir multimedia de publicación
+        async function testUploadPostMedia() {
+            const postId = document.getElementById('postId').value;
+            const fileInput = document.getElementById('postMediaInput');
+            const result = document.getElementById('postMediaResult');
+
+            if (!postId || !fileInput.files[0]) {
+                showResult(result, 'Por favor ingresa un ID de publicación y selecciona una imagen', 'error');
+                return;
+            }
+
+            const validation = validateImageFile(fileInput.files[0], 10); // 10MB max
+            if (!validation.valid) {
+                showResult(result, validation.error, 'error');
+                return;
+            }
+
+            try {
+                const response = await uploadPublicacionMedia(postId, fileInput.files[0]);
+                showResult(result, 'Multimedia subida correctamente: ' + JSON.stringify(response), 'success');
+            } catch (error) {
+                showResult(result, 'Error: ' + error.message, 'error');
+            }
+        }
+
+        // Test ver foto de usuario
+        function testViewUserPhoto() {
+            const userId = document.getElementById('viewUserId').value;
+            const img = document.getElementById('viewUserPhoto');
+
+            if (!userId) {
+                alert('Por favor ingresa un ID de usuario');
+                return;
+            }
+
+            img.src = getUserPhotoUrl(userId) + '?t=' + Date.now();
+            img.classList.remove('hidden');
+            img.onerror = () => {
+                alert('No se pudo cargar la imagen. Verifica que el usuario tenga una foto.');
+            };
+        }
+
+        // Test ver multimedia de publicación
+        function testViewPostMedia() {
+            const postId = document.getElementById('viewPostId').value;
+            const img = document.getElementById('viewPostMedia');
+
+            if (!postId) {
+                alert('Por favor ingresa un ID de publicación');
+                return;
+            }
+
+            img.src = getPublicacionMediaUrl(postId) + '?t=' + Date.now();
+            img.classList.remove('hidden');
+            img.onerror = () => {
+                alert('No se pudo cargar la imagen. Verifica que la publicación tenga multimedia.');
+            };
+        }
+
+        // Mostrar resultado
+        function showResult(element, message, type) {
+            element.textContent = message;
+            element.classList.remove('hidden', 'bg-green-100', 'text-green-700', 'bg-red-100', 'text-red-700');
+            
+            if (type === 'success') {
+                element.classList.add('bg-green-100', 'text-green-700');
+            } else {
+                element.classList.add('bg-red-100', 'text-red-700');
+            }
+        }
+    </script>
+
+</body>
+</html>
