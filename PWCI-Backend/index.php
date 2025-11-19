@@ -124,15 +124,18 @@
                 if ($pdo) {
                     echo "<p>✅ <strong>Base de datos:</strong> Conectada correctamente</p>";
                     
-                    // Contar tablas
+                    // Contar tablas usando SHOW TABLES (comando de sistema, no es query de datos)
                     $stmt = $pdo->query("SHOW TABLES");
                     $tables = $stmt->fetchAll(PDO::FETCH_COLUMN);
                     echo "<p>📋 <strong>Tablas disponibles:</strong> " . count($tables) . "</p>";
                     
-                    // Contar usuarios
-                    $stmt = $pdo->query("SELECT COUNT(*) FROM Usuario");
-                    $users = $stmt->fetchColumn();
+                    // Contar usuarios usando stored procedure
+                    $stmt = $pdo->prepare("CALL sp_contar_usuarios()");
+                    $stmt->execute();
+                    $result = $stmt->fetch(PDO::FETCH_ASSOC);
+                    $users = $result['total'] ?? 0;
                     echo "<p>👥 <strong>Usuarios registrados:</strong> " . $users . "</p>";
+                    $stmt->closeCursor();
                     
                 } else {
                     echo "<p>❌ <strong>Base de datos:</strong> Error de conexión</p>";

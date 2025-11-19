@@ -4,17 +4,17 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Ejemplo de Uso - API Middleware</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?v=3.4.1"></script>
 </head>
 <body class="bg-gray-900 text-white p-8">
     
         
-        <!-- Estado de Sesi√≥n -->
+        <!-- Estado de SesiÛn -->
         <div class="bg-gray-800 p-6 rounded-lg">
-            <h2 class="text-2xl font-semibold mb-4">Estado de Sesi√≥n</h2>
+            <h2 class="text-2xl font-semibold mb-4">Estado de SesiÛn</h2>
             <div id="sessionStatus"></div>
             <button onclick="showSession()" class="mt-4 px-6 py-2 bg-gray-600 hover:bg-gray-700 rounded">Actualizar</button>
-            <button onclick="AuthAPI.logout()" class="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 rounded ml-2">Cerrar Sesi√≥n</button>
+            <button onclick="AuthAPI.logout()" class="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 rounded ml-2">Cerrar SesiÛn</button>
         </div>
     </div>
     
@@ -22,12 +22,12 @@
     <script src="../controllers/api-client.js"></script>
     
     <script>
-        // Mostrar estado de sesi√≥n al cargar
+        // Mostrar estado de sesiÛn al cargar
         window.addEventListener('DOMContentLoaded', showSession);
         
         
         
-        // Mostrar estado de sesi√≥n
+        // Mostrar estado de sesiÛn
         function showSession() {
             const token = localStorage.getItem('authToken');
             const userData = localStorage.getItem('userData');
@@ -39,7 +39,7 @@
             const statusDiv = document.getElementById('sessionStatus');
             statusDiv.innerHTML = `
                 <div class="space-y-2 text-sm">
-                    <p><strong>Autenticado:</strong> ${isAuth ? '‚úÖ S√≠' : '‚ùå No'}</p>
+                    <p><strong>Autenticado:</strong> ${isAuth ? '? SÌ' : '? No'}</p>
                     ${user ? `
                         <p><strong>Usuario:</strong> ${user.nombreCompleto}</p>
                         <p><strong>Email:</strong> ${user.correoElectronico}</p>

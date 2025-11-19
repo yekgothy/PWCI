@@ -3,8 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Test BLOB - Subir Im√°genes</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <title>Test BLOB - Subir Im·genes</title>
+    <script src="https://cdn.tailwindcss.com?v=3.4.1"></script>
 </head>
 <body class="bg-neutral-50 text-neutral-900">
     
@@ -13,8 +13,8 @@
             
             <!-- Header -->
             <div class="mb-8">
-                <h1 class="text-3xl font-bold mb-2">Sistema BLOB - Prueba de Im√°genes</h1>
-                <p class="text-neutral-600">Prueba la subida y descarga de im√°genes almacenadas como BLOB en la base de datos</p>
+                <h1 class="text-3xl font-bold mb-2">Sistema BLOB - Prueba de Im·genes</h1>
+                <p class="text-neutral-600">Prueba la subida y descarga de im·genes almacenadas como BLOB en la base de datos</p>
             </div>
 
             <!-- Test 1: Subir foto de perfil -->
@@ -42,12 +42,12 @@
                 <div id="userPhotoResult" class="mt-4 p-3 rounded-lg hidden"></div>
             </div>
 
-            <!-- Test 2: Subir multimedia de publicaci√≥n -->
+            <!-- Test 2: Subir multimedia de publicaciÛn -->
             <div class="bg-white rounded-xl shadow-md p-6 mb-6">
-                <h2 class="text-xl font-bold mb-4">2. Subir Multimedia de Publicaci√≥n</h2>
+                <h2 class="text-xl font-bold mb-4">2. Subir Multimedia de PublicaciÛn</h2>
                 
                 <div class="mb-4">
-                    <label class="block text-sm font-medium mb-2">ID de Publicaci√≥n:</label>
+                    <label class="block text-sm font-medium mb-2">ID de PublicaciÛn:</label>
                     <input type="number" id="postId" class="w-full px-3 py-2 border border-neutral-300 rounded-lg" placeholder="Ej: 1">
                 </div>
 
@@ -67,9 +67,9 @@
                 <div id="postMediaResult" class="mt-4 p-3 rounded-lg hidden"></div>
             </div>
 
-            <!-- Test 3: Ver im√°genes -->
+            <!-- Test 3: Ver im·genes -->
             <div class="bg-white rounded-xl shadow-md p-6 mb-6">
-                <h2 class="text-xl font-bold mb-4">3. Ver Im√°genes Almacenadas</h2>
+                <h2 class="text-xl font-bold mb-4">3. Ver Im·genes Almacenadas</h2>
                 
                 <div class="grid grid-cols-2 gap-4">
                     <div>
@@ -84,7 +84,7 @@
                     </div>
 
                     <div>
-                        <label class="block text-sm font-medium mb-2">Ver multimedia de publicaci√≥n (ID):</label>
+                        <label class="block text-sm font-medium mb-2">Ver multimedia de publicaciÛn (ID):</label>
                         <div class="flex gap-2">
                             <input type="number" id="viewPostId" class="flex-1 px-3 py-2 border border-neutral-300 rounded-lg" placeholder="ID">
                             <button onclick="testViewPostMedia()" class="bg-black text-white px-4 py-2 rounded-lg hover:bg-neutral-800">Ver</button>
@@ -98,14 +98,14 @@
 
             <!-- Instrucciones -->
             <div class="bg-blue-50 border-2 border-blue-200 rounded-xl p-6">
-                <h3 class="font-bold mb-2">üìù Instrucciones:</h3>
+                <h3 class="font-bold mb-2">?? Instrucciones:</h3>
                 <ol class="list-decimal list-inside space-y-1 text-sm">
-                    <li>Aseg√∫rate de estar autenticado (tener token en localStorage)</li>
-                    <li>Ingresa un ID de usuario o publicaci√≥n v√°lido</li>
+                    <li>Aseg˙rate de estar autenticado (tener token en localStorage)</li>
+                    <li>Ingresa un ID de usuario o publicaciÛn v·lido</li>
                     <li>Selecciona una imagen (JPG, PNG, GIF o WEBP)</li>
                     <li>Haz clic en "Subir" para enviar la imagen al servidor</li>
-                    <li>La imagen se almacenar√° como BLOB en la base de datos</li>
-                    <li>Usa la secci√≥n "Ver Im√°genes" para recuperar las im√°genes almacenadas</li>
+                    <li>La imagen se almacenar· como BLOB en la base de datos</li>
+                    <li>Usa la secciÛn "Ver Im·genes" para recuperar las im·genes almacenadas</li>
                 </ol>
             </div>
 
@@ -126,7 +126,7 @@
             }
         });
 
-        // Preview de multimedia de publicaci√≥n
+        // Preview de multimedia de publicaciÛn
         document.getElementById('postMediaInput').addEventListener('change', (e) => {
             const file = e.target.files[0];
             const preview = document.getElementById('postMediaPreview');
@@ -161,14 +161,14 @@
             }
         }
 
-        // Test subir multimedia de publicaci√≥n
+        // Test subir multimedia de publicaciÛn
         async function testUploadPostMedia() {
             const postId = document.getElementById('postId').value;
             const fileInput = document.getElementById('postMediaInput');
             const result = document.getElementById('postMediaResult');
 
             if (!postId || !fileInput.files[0]) {
-                showResult(result, 'Por favor ingresa un ID de publicaci√≥n y selecciona una imagen', 'error');
+                showResult(result, 'Por favor ingresa un ID de publicaciÛn y selecciona una imagen', 'error');
                 return;
             }
 
@@ -203,20 +203,20 @@
             };
         }
 
-        // Test ver multimedia de publicaci√≥n
+        // Test ver multimedia de publicaciÛn
         function testViewPostMedia() {
             const postId = document.getElementById('viewPostId').value;
             const img = document.getElementById('viewPostMedia');
 
             if (!postId) {
-                alert('Por favor ingresa un ID de publicaci√≥n');
+                alert('Por favor ingresa un ID de publicaciÛn');
                 return;
             }
 
             img.src = getPublicacionMediaUrl(postId) + '?t=' + Date.now();
             img.classList.remove('hidden');
             img.onerror = () => {
-                alert('No se pudo cargar la imagen. Verifica que la publicaci√≥n tenga multimedia.');
+                alert('No se pudo cargar la imagen. Verifica que la publicaciÛn tenga multimedia.');
             };
         }
 

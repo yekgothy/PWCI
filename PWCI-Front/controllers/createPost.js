@@ -137,36 +137,52 @@ function renderWorldCups() {
  */
 function initializeFormEvents() {
     const form = document.getElementById('createPostForm');
-    const imageUrlInput = document.getElementById('imageUrl');
+    const imageFileInput = document.getElementById('imageFile');
     const imagePreview = document.getElementById('imagePreview');
     const previewImage = document.getElementById('previewImage');
     const removeImageBtn = document.getElementById('removeImage');
     const contentTextarea = document.getElementById('content');
     const charCounter = document.getElementById('charCounter');
+    const imageInfo = document.getElementById('imageInfo');
 
     // Evento de submit del formulario
     if (form) {
         form.addEventListener('submit', handleFormSubmit);
     }
 
-    // Preview de imagen
-    if (imageUrlInput) {
-        imageUrlInput.addEventListener('input', (e) => {
-            const url = e.target.value.trim();
-            if (url && isValidImageUrl(url)) {
-                if (previewImage) {
-                    previewImage.src = url;
-                    previewImage.onerror = () => {
-                        imagePreview.classList.add('hidden');
-                    };
-                    previewImage.onload = () => {
+    // Preview de imagen desde archivo
+    if (imageFileInput) {
+        imageFileInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                // Validar tamaño (5MB)
+                if (file.size > 5 * 1024 * 1024) {
+                    alert('La imagen no debe superar los 5MB');
+                    imageFileInput.value = '';
+                    return;
+                }
+
+                // Validar tipo
+                const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+                if (!validTypes.includes(file.type)) {
+                    alert('Solo se permiten imágenes JPG, PNG, GIF o WebP');
+                    imageFileInput.value = '';
+                    return;
+                }
+
+                // Mostrar preview
+                const reader = new FileReader();
+                reader.onload = (event) => {
+                    if (previewImage) {
+                        previewImage.src = event.target.result;
                         imagePreview.classList.remove('hidden');
-                    };
-                }
-            } else {
-                if (imagePreview) {
-                    imagePreview.classList.add('hidden');
-                }
+                    }
+                    if (imageInfo) {
+                        const sizeMB = (file.size / (1024 * 1024)).toFixed(2);
+                        imageInfo.textContent = `${file.name} (${sizeMB} MB)`;
+                    }
+                };
+                reader.readAsDataURL(file);
             }
         });
     }
@@ -174,8 +190,9 @@ function initializeFormEvents() {
     // Remover imagen
     if (removeImageBtn) {
         removeImageBtn.addEventListener('click', () => {
-            imageUrlInput.value = '';
+            imageFileInput.value = '';
             imagePreview.classList.add('hidden');
+            if (imageInfo) imageInfo.textContent = '';
         });
     }
 
@@ -222,7 +239,7 @@ async function handleFormSubmit(e) {
     const contenido = document.getElementById('content').value.trim();
     const idCategoria = document.getElementById('category').value;
     const idMundial = document.getElementById('mundial').value;
-    const urlMultimedia = document.getElementById('imageUrl').value.trim();
+    const imageFile = document.getElementById('imageFile').files[0];
 
     // Validaciones
     if (!titulo || titulo.length < 5) {
@@ -245,19 +262,6 @@ async function handleFormSubmit(e) {
         return;
     }
 
-    // Preparar datos
-    const postData = {
-        titulo,
-        contenido,
-        idCategoria: parseInt(idCategoria),
-        idMundial: parseInt(idMundial)
-    };
-
-    // Agregar imagen si existe
-    if (urlMultimedia) {
-        postData.urlMultimedia = urlMultimedia;
-    }
-
     // Mostrar loading
     const submitBtn = document.getElementById('submitBtn');
     const originalBtnText = submitBtn.textContent;
@@ -266,7 +270,29 @@ async function handleFormSubmit(e) {
     submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
 
     try {
-        await createPost(postData);
+        // Paso 1: Crear la publicación en la base de datos
+        const postData = {
+            titulo,
+            contenido,
+            idCategoria: parseInt(idCategoria),
+            idMundial: parseInt(idMundial)
+        };
+
+        const newPostId = await createPost(postData);
+
+        // Paso 2: Si hay imagen, subirla como BLOB
+        if (imageFile && newPostId) {
+            await uploadImageBlob(newPostId, imageFile);
+        }
+
+        // Éxito
+        showSuccess('¡Publicación creada exitosamente! Será revisada por un administrador.');
+        
+        // Esperar 2 segundos y redirigir
+        setTimeout(() => {
+            window.location.href = 'profileDetails.html';
+        }, 2000);
+
     } catch (error) {
         console.error('Error creating post:', error);
         showError('Error al crear la publicación. Intenta de nuevo.');
@@ -287,7 +313,7 @@ async function createPost(postData) {
     if (!token) {
         alert('Sesión expirada. Por favor inicia sesión nuevamente.');
         window.location.href = 'login.html';
-        return;
+        return null;
     }
 
     try {
@@ -306,17 +332,47 @@ async function createPost(postData) {
             throw new Error(data.message || 'Error al crear la publicación');
         }
 
-        // Mostrar mensaje de éxito
-        showSuccess('¡Publicación creada exitosamente! Está pendiente de aprobación.');
+        console.log('✅ Publicación creada:', data);
         
-        // Redirigir al feed después de 2 segundos
-        setTimeout(() => {
-            window.location.href = 'feed.html';
-        }, 2000);
+        // Retornar el ID de la nueva publicación
+        return data.data?.idPublicacion || data.data;
 
     } catch (error) {
         console.error('Error:', error);
         throw error;
+    }
+}
+
+/**
+ * Sube la imagen como BLOB después de crear la publicación
+ */
+async function uploadImageBlob(idPublicacion, imageFile) {
+    try {
+        const formData = new FormData();
+        formData.append('imagen', imageFile);
+        formData.append('tipo', 'publicacion');
+        formData.append('id', idPublicacion);
+
+        const response = await fetch('http://localhost/PWCI/PWCI-Backend/blob-api.php?action=upload', {
+            method: 'POST',
+            body: formData
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+            console.error('❌ Error al subir imagen BLOB:', data.message);
+            // No lanzar error, la publicación ya fue creada
+            return false;
+        }
+
+        console.log('✅ Imagen BLOB subida exitosamente:', data);
+        return true;
+
+    } catch (error) {
+        console.error('❌ Error al subir imagen BLOB:', error);
+        // No lanzar error, la publicación ya fue creada
+        return false;
     }
 }
 

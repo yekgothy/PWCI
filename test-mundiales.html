@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Mundiales</title>
+</head>
+<body>
+    <h1>Test de API Mundiales</h1>
+    <button onclick="testGetMundiales()">Test GET Mundiales</button>
+    <button onclick="testCreateMundial()">Test CREATE Mundial</button>
+    <div id="results" style="margin-top: 20px; padding: 20px; border: 1px solid #ccc;">
+        <h2>Resultados:</h2>
+        <pre id="output"></pre>
+    </div>
+
+    <script>
+        const API_URL = 'http://localhost/PWCI/PWCI-Backend/api.php';
+        
+        async function testGetMundiales() {
+            try {
+                console.log('Testeando GET /mundiales...');
+                const response = await fetch(`${API_URL}/mundiales`);
+                const data = await response.json();
+                console.log('Respuesta:', data);
+                document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('output').textContent = 'Error: ' + error.message;
+            }
+        }
+
+        async function testCreateMundial() {
+            const token = localStorage.getItem('authToken');
+            if (!token) {
+                alert('Necesitas estar autenticado como admin');
+                return;
+            }
+
+            try {
+                console.log('Testeando POST /mundiales...');
+                const response = await fetch(`${API_URL}/mundiales`, {
+                    method: 'POST',
+                    headers: {
+                        'Authorization': `Bearer ${token}`,
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        anio: 2026,
+                        paisSede: 'México',
+                        nombreOficial: 'Copa Mundial FIFA 2026',
+                        logo: 'https://example.com/logo.png',
+                        descripcion: 'Mundial de prueba',
+                        fechaInicio: '2026-06-11',
+                        fechaFin: '2026-07-19',
+                        numeroEquipos: 48,
+                        estado: 'proximo'
+                    })
+                });
+                const data = await response.json();
+                console.log('Respuesta:', data);
+                document.getElementById('output').textContent = JSON.stringify(data, null, 2);
+            } catch (error) {
+                console.error('Error:', error);
+                document.getElementById('output').textContent = 'Error: ' + error.message;
+            }
+        }
+    </script>
+</body>
+</html>

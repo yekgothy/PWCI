@@ -45,6 +45,7 @@ DROP PROCEDURE IF EXISTS sp_obtener_interaccion_usuario;
 DROP PROCEDURE IF EXISTS sp_contar_interacciones;
 DROP PROCEDURE IF EXISTS sp_obtener_todos_comentarios;
 DROP PROCEDURE IF EXISTS sp_obtener_todos_usuarios;
+DROP PROCEDURE IF EXISTS sp_incrementar_vistas_publicacion;
 
 DELIMITER //
 
@@ -163,7 +164,12 @@ CREATE PROCEDURE sp_obtener_publicaciones_aprobadas()
 BEGIN
     SELECT 
         p.idPublicacion, p.titulo, p.contenido, p.urlMultimedia, p.estado,
-        p.likes, p.dislikes, p.fechaPublicacion, p.fechaAprobacion,
+        p.multimediaMimeType, p.multimediaNombre,
+        CASE WHEN p.multimediaBlob IS NOT NULL THEN 1 ELSE 0 END as tieneBlob,
+        (SELECT COUNT(*) FROM Interaccion WHERE idPublicacion = p.idPublicacion AND tipo = 'like') as likes,
+        (SELECT COUNT(*) FROM Interaccion WHERE idPublicacion = p.idPublicacion AND tipo = 'dislike') as dislikes,
+        p.vistas,
+        p.fechaPublicacion, p.fechaAprobacion,
         u.idUsuario, u.nombreCompleto as nombreAutor, u.foto as fotoAutor,
         c.idCategoria, c.nombre as nombreCategoria, c.color as colorCategoria,
         m.idMundial, m.anio as anioMundial, m.paisSede,
@@ -183,7 +189,12 @@ CREATE PROCEDURE sp_obtener_publicacion_por_id(
 BEGIN
     SELECT 
         p.idPublicacion, p.titulo, p.contenido, p.urlMultimedia, p.estado,
-        p.likes, p.dislikes, p.fechaPublicacion, p.fechaAprobacion,
+        p.multimediaMimeType, p.multimediaNombre,
+        CASE WHEN p.multimediaBlob IS NOT NULL THEN 1 ELSE 0 END as tieneBlob,
+        (SELECT COUNT(*) FROM Interaccion WHERE idPublicacion = p.idPublicacion AND tipo = 'like') as likes,
+        (SELECT COUNT(*) FROM Interaccion WHERE idPublicacion = p.idPublicacion AND tipo = 'dislike') as dislikes,
+        p.vistas,
+        p.fechaPublicacion, p.fechaAprobacion,
         u.idUsuario, u.nombreCompleto as nombreAutor, u.foto as fotoAutor,
         c.idCategoria, c.nombre as nombreCategoria, c.color as colorCategoria,
         m.idMundial, m.anio as anioMundial, m.paisSede,
@@ -202,7 +213,12 @@ CREATE PROCEDURE sp_obtener_publicaciones_por_estado(
 BEGIN
     SELECT 
         p.idPublicacion, p.titulo, p.contenido, p.urlMultimedia, p.estado,
-        p.likes, p.dislikes, p.fechaPublicacion, p.fechaAprobacion,
+        p.multimediaMimeType, p.multimediaNombre,
+        CASE WHEN p.multimediaBlob IS NOT NULL THEN 1 ELSE 0 END as tieneBlob,
+        (SELECT COUNT(*) FROM Interaccion WHERE idPublicacion = p.idPublicacion AND tipo = 'like') as likes,
+        (SELECT COUNT(*) FROM Interaccion WHERE idPublicacion = p.idPublicacion AND tipo = 'dislike') as dislikes,
+        p.vistas,
+        p.fechaPublicacion, p.fechaAprobacion,
         u.idUsuario, u.nombreCompleto as nombreAutor, u.foto as fotoAutor,
         c.idCategoria, c.nombre as nombreCategoria, c.color as colorCategoria,
         m.idMundial, m.anio as anioMundial, m.paisSede,
@@ -239,7 +255,13 @@ CREATE PROCEDURE sp_obtener_publicaciones_usuario(
 BEGIN
     SELECT 
         p.idPublicacion, p.titulo, p.contenido, p.urlMultimedia,
-        p.fechaPublicacion, p.estado, p.likes, p.dislikes,
+        p.multimediaMimeType, p.multimediaNombre,
+        CASE WHEN p.multimediaBlob IS NOT NULL THEN 1 ELSE 0 END as tieneBlob,
+        p.fechaPublicacion, p.estado,
+        (SELECT COUNT(*) FROM Interaccion WHERE idPublicacion = p.idPublicacion AND tipo = 'like') as likes,
+        (SELECT COUNT(*) FROM Interaccion WHERE idPublicacion = p.idPublicacion AND tipo = 'dislike') as dislikes,
+        p.vistas,
+        (SELECT COUNT(*) FROM Comentario WHERE idPublicacion = p.idPublicacion AND activo = TRUE) as totalComentarios,
         c.idCategoria, c.nombre as nombreCategoria, c.color as colorCategoria,
         m.idMundial, m.anio as anioMundial, m.paisSede
     FROM Publicacion p
@@ -404,11 +426,16 @@ CREATE PROCEDURE sp_crear_mundial(
     IN p_anio INT,
     IN p_paisSede VARCHAR(50),
     IN p_logo VARCHAR(255),
-    IN p_nombreOficial VARCHAR(100)
+    IN p_nombreOficial VARCHAR(100),
+    IN p_descripcion TEXT,
+    IN p_fechaInicio DATE,
+    IN p_fechaFin DATE,
+    IN p_numeroEquipos INT,
+    IN p_estado VARCHAR(20)
 )
 BEGIN
-    INSERT INTO Mundial (anio, paisSede, logo, nombreOficial)
-    VALUES (p_anio, p_paisSede, p_logo, p_nombreOficial);
+    INSERT INTO Mundial (anio, paisSede, logo, nombreOficial, descripcion, fechaInicio, fechaFin, numeroEquipos, estado)
+    VALUES (p_anio, p_paisSede, p_logo, p_nombreOficial, p_descripcion, p_fechaInicio, p_fechaFin, p_numeroEquipos, p_estado);
     SELECT LAST_INSERT_ID() as idMundial;
 END//
 
@@ -418,14 +445,24 @@ CREATE PROCEDURE sp_actualizar_mundial(
     IN p_anio INT,
     IN p_paisSede VARCHAR(50),
     IN p_logo VARCHAR(255),
-    IN p_nombreOficial VARCHAR(100)
+    IN p_nombreOficial VARCHAR(100),
+    IN p_descripcion TEXT,
+    IN p_fechaInicio DATE,
+    IN p_fechaFin DATE,
+    IN p_numeroEquipos INT,
+    IN p_estado VARCHAR(20)
 )
 BEGIN
     UPDATE Mundial
     SET anio = COALESCE(p_anio, anio),
         paisSede = COALESCE(p_paisSede, paisSede),
         logo = COALESCE(p_logo, logo),
-        nombreOficial = COALESCE(p_nombreOficial, nombreOficial)
+        nombreOficial = COALESCE(p_nombreOficial, nombreOficial),
+        descripcion = COALESCE(p_descripcion, descripcion),
+        fechaInicio = COALESCE(p_fechaInicio, fechaInicio),
+        fechaFin = COALESCE(p_fechaFin, fechaFin),
+        numeroEquipos = COALESCE(p_numeroEquipos, numeroEquipos),
+        estado = COALESCE(p_estado, estado)
     WHERE idMundial = p_idMundial;
     SELECT ROW_COUNT() as filasAfectadas;
 END//
@@ -569,8 +606,29 @@ BEGIN
     WHERE idPublicacion = p_idPublicacion;
 END//
 
+-- 38. Incrementar vistas de publicación
+CREATE PROCEDURE sp_incrementar_vistas_publicacion(
+    IN p_idPublicacion INT
+)
+BEGIN
+    UPDATE Publicacion 
+    SET vistas = vistas + 1 
+    WHERE idPublicacion = p_idPublicacion;
+    
+    SELECT vistas FROM Publicacion WHERE idPublicacion = p_idPublicacion;
+END//
+
+-- ============================================
+-- SP AUXILIAR: Contar usuarios (para diagnóstico)
+-- ============================================
+DROP PROCEDURE IF EXISTS sp_contar_usuarios //
+CREATE PROCEDURE sp_contar_usuarios()
+BEGIN
+    SELECT COUNT(*) as total FROM Usuario;
+END//
+
 DELIMITER ;
 
 -- ============================================
-SELECT '✅ 38 STORED PROCEDURES CREADOS EXITOSAMENTE' as status;
-SELECT 'Sistema listo sin BLOB' as info;
+SELECT '✅ 40 STORED PROCEDURES CREADOS EXITOSAMENTE' as status;
+SELECT 'Sistema con BLOB y vistas completo' as info;

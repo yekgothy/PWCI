@@ -147,6 +147,9 @@ if ($endpoint === 'publicaciones' && isset($request[2])) {
     if ($action === 'interaccion') {
         handleDeleteInteraccion($method, $request, $input);
     }
+    if ($action === 'incrementar-vistas') {
+        handleIncrementarVistas($method, $request, $input);
+    }
 }
 
 switch ($endpoint) {
@@ -922,3 +925,26 @@ function handleDeleteInteraccion($method, $request, $input) {
     
     sendResponse(null, 200, 'Interacción eliminada correctamente');
 }
+
+// Endpoint para incrementar vistas: POST /publicaciones/{id}/incrementar-vistas
+function handleIncrementarVistas($method, $request, $input) {
+    if ($method !== 'POST') {
+        sendError('Método no permitido', 405);
+    }
+    
+    $idPublicacion = (int)$request[1];
+    
+    if (!$idPublicacion) {
+        sendError('ID de publicación requerido', 400);
+    }
+    
+    // Llamar al SP que incrementa vistas y retorna el nuevo valor
+    $result = callStoredProcedure('sp_incrementar_vistas_publicacion', [$idPublicacion]);
+    
+    if (!empty($result)) {
+        sendResponse(['vistas' => $result[0]['vistas']], 200, 'Vista registrada');
+    } else {
+        sendError('Error al incrementar vistas', 500);
+    }
+}
+

@@ -169,7 +169,7 @@ function validateForm(nombreCompleto, email, password, fechaNacimiento, acceptTe
     }
     
     if (fechaNacimiento && !isValidAge(fechaNacimiento)) {
-        showError('Debes ser mayor de 13 años para registrarte');
+        showError('Debes ser mayor de 12 años para registrarte');
         if (fechaNacimientoInput) fechaNacimientoInput.focus();
         return false;
     }
@@ -201,7 +201,7 @@ function isStrongPassword(password) {
 }
 
 /**
- * Validar edad mínima (13 años)
+ * Validar edad mínima (12 años)
  */
 function isValidAge(fechaNacimiento) {
     const today = new Date();
@@ -210,10 +210,10 @@ function isValidAge(fechaNacimiento) {
     const monthDiff = today.getMonth() - birthDate.getMonth();
     
     if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        return age - 1 >= 13;
+        return age - 1 >= 12;
     }
     
-    return age >= 13;
+    return age >= 12;
 }
 
 /**

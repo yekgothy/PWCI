@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Feed - World Cup Hub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?v=3.4.1"></script>
 </head>
 <body class="font-sans text-neutral-900" style="background: url('../public/bgFeed.png') center/cover no-repeat fixed;">
 
@@ -21,6 +21,77 @@
 
         <!-- CONTENIDO PRINCIPAL -->
         <main class="flex-1 w-full md:ml-64 lg:mr-80 px-4 md:px-8 lg:px-12 py-8" id="feed-main">
+            <!-- Barra de búsqueda y filtros -->
+            <div class="mb-8 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-zinc-200 p-6">
+                <!-- Título -->
+                <div class="flex items-center gap-3 mb-6">
+                    <svg class="w-6 h-6 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
+                    </svg>
+                    <h2 class="text-xl font-bold text-zinc-800">Buscar y Filtrar Publicaciones</h2>
+                </div>
+
+                <!-- Buscador -->
+                <div class="mb-4">
+                    <div class="relative">
+                        <input 
+                            type="text" 
+                            id="searchInput" 
+                            placeholder="Buscar por título o contenido..." 
+                            class="w-full px-4 py-3 pl-12 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                        >
+                        <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+                        </svg>
+                    </div>
+                </div>
+
+                <!-- Filtros en fila -->
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                    <!-- Filtro por Categoría -->
+                    <div>
+                        <label class="block text-sm font-semibold text-zinc-700 mb-2">Categoría</label>
+                        <select id="categoryFilter" class="w-full px-4 py-2.5 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all">
+                            <option value="">Todas las categorías</option>
+                        </select>
+                    </div>
+
+                    <!-- Filtro por Mundial -->
+                    <div>
+                        <label class="block text-sm font-semibold text-zinc-700 mb-2">Mundial</label>
+                        <select id="worldCupFilter" class="w-full px-4 py-2.5 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all">
+                            <option value="">Todos los mundiales</option>
+                        </select>
+                    </div>
+
+                    <!-- Ordenar por -->
+                    <div>
+                        <label class="block text-sm font-semibold text-zinc-700 mb-2">Ordenar por</label>
+                        <select id="sortFilter" class="w-full px-4 py-2.5 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all">
+                            <option value="recientes">Más recientes</option>
+                            <option value="antiguos">Más antiguos</option>
+                            <option value="likes">Más likes</option>
+                            <option value="comentarios">Más comentados</option>
+                            <option value="vistas">Más vistos</option>
+                        </select>
+                    </div>
+                </div>
+
+                <!-- Botón de limpiar filtros -->
+                <div class="mt-4 flex justify-end">
+                    <button id="clearFiltersBtn" class="px-4 py-2 text-sm font-semibold text-zinc-600 hover:text-zinc-800 hover:bg-zinc-100 rounded-lg transition-all">
+                        <svg class="inline-block w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                        </svg>
+                        Limpiar filtros
+                    </button>
+                </div>
+
+                <!-- Contador de resultados -->
+                <div id="resultsCount" class="mt-4 text-sm text-zinc-600 font-medium"></div>
+            </div>
+
+            <!-- Contenedor de publicaciones -->
             <div id="main-content-container"></div>
         </main>
 
@@ -32,7 +103,7 @@
 
     <!-- JavaScript para cargar componentes -->
     <script>
-        // Función para inicializar el navbar
+        // Funci�n para inicializar el navbar
         function initializeNavbar() {
             const menuButton = document.getElementById('menuButton');
             const sidebarMenu = document.getElementById('sidebarMenu');
@@ -40,19 +111,19 @@
             const menuOverlay = document.getElementById('menuOverlay');
 
             if (menuButton && sidebarMenu) {
-                // Abrir menú hamburguesa
+                // Abrir men� hamburguesa
                 menuButton.addEventListener('click', function() {
                     sidebarMenu.classList.remove('hidden');
                 });
 
-                // Cerrar menú con botón X
+                // Cerrar men� con bot�n X
                 if (closeMenuButton) {
                     closeMenuButton.addEventListener('click', function() {
                         sidebarMenu.classList.add('hidden');
                     });
                 }
 
-                // Cerrar menú haciendo clic en el overlay
+                // Cerrar men� haciendo clic en el overlay
                 if (menuOverlay) {
                     menuOverlay.addEventListener('click', function() {
                         sidebarMenu.classList.add('hidden');
@@ -61,7 +132,7 @@
             }
         }
 
-        // Inicializar countdown (mueve lógica fuera del componente)
+        // Inicializar countdown (mueve l�gica fuera del componente)
         function initCountdown() {
             const target = new Date("June 11, 2026 00:00:00").getTime();
             function update() {
@@ -70,7 +141,7 @@
                 if (diff <= 0) {
                     const el = document.getElementById('countdown');
                     if (el) {
-                        el.innerHTML = "<p class='col-span-4 text-center text-lg font-bold'>¡El Mundial ha comenzado!</p>";
+                        el.innerHTML = "<p class='col-span-4 text-center text-lg font-bold'>�El Mundial ha comenzado!</p>";
                     }
                     return; // No reprogramar
                 }
@@ -106,12 +177,7 @@
                     document.getElementById('sidebar-left-container').innerHTML = data;
                 }),
 
-            // Cargar Contenido Principal (Posts)
-            fetch('../components/cardpostFeed.html?v=2')
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('main-content-container').innerHTML = data;
-                }),
+            // NO cargar cardpostFeed.html - feed.js maneja el contenido principal
 
             // Cargar Sidebar Derecho
             fetch('../components/sidebarFeed2.html?v=3')
@@ -124,7 +190,7 @@
         .then(() => {
             console.log('Todos los componentes cargados exitosamente');
             
-            // Inicializar navbar y sidebar después de que todo esté cargado
+            // Inicializar navbar y sidebar despu�s de que todo est� cargado
             setTimeout(() => {
                 initializeNavbar();
                 initUserInterface();
@@ -139,7 +205,7 @@
             console.error('Error cargando componentes:', error);
         });
         
-        // Función para inicializar la interfaz de usuario
+        // Funci�n para inicializar la interfaz de usuario
         function initUserInterface() {
             // Obtener datos del usuario
             const userData = getUserDataFromStorage();
@@ -165,7 +231,7 @@
             }
         }
         
-        // Actualizar navbar con información del usuario
+        // Actualizar navbar con informaci�n del usuario
         function updateNavbar(userData, isAuth) {
             const authButtons = document.getElementById('authButtons');
             const userMenu = document.getElementById('userMenu');
@@ -176,7 +242,7 @@
                 // Ocultar botones de login/signup
                 if (authButtons) authButtons.classList.add('hidden');
                 
-                // Mostrar menú de usuario
+                // Mostrar men� de usuario
                 if (userMenu) {
                     userMenu.classList.remove('hidden');
                     userMenu.classList.add('flex');
@@ -195,12 +261,12 @@
                 // Mostrar botones de login/signup
                 if (authButtons) authButtons.classList.remove('hidden');
                 
-                // Ocultar menú de usuario
+                // Ocultar men� de usuario
                 if (userMenu) userMenu.classList.add('hidden');
             }
         }
         
-        // Actualizar sidebar con información del usuario
+        // Actualizar sidebar con informaci�n del usuario
         function updateSidebar(userData, isAuth) {
             const sidebarUserName = document.getElementById('sidebarUserName');
             const sidebarUserInitials = document.getElementById('sidebarUserInitials');
@@ -235,9 +301,9 @@
             return (words[0][0] + words[words.length - 1][0]).toUpperCase();
         }
         
-        // Manejar cierre de sesión
+        // Manejar cierre de sesi�n
         function handleLogout() {
-            if (confirm('¿Estás seguro de que quieres cerrar sesión?')) {
+            if (confirm('�Est�s seguro de que quieres cerrar sesi�n?')) {
                 localStorage.removeItem('userData');
                 localStorage.removeItem('authToken');
                 localStorage.removeItem('loginTime');

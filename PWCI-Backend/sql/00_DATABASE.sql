@@ -1,6 +1,7 @@
 -- =====================================================
--- DATABASE.SQL - ESTRUCTURA DE TABLAS DEFINITIVA
--- VERSION ESTABLE SIN BLOB
+-- DATABASE_DEFINITIVO.SQL - ESTRUCTURA DE TABLAS DEFINITIVA
+-- VERSION CON BLOB Y VISTAS
+-- Incluye: LONGBLOB para imágenes, contador de vistas
 -- =====================================================
 
 CREATE DATABASE IF NOT EXISTS BDM;
@@ -30,7 +31,6 @@ CREATE TABLE IF NOT EXISTS Usuario (
 CREATE TABLE IF NOT EXISTS Mundial (
     idMundial INT AUTO_INCREMENT PRIMARY KEY,
     anio INT NOT NULL,
-    paisMundial VARCHAR(50) NOT NULL,
     paisSede VARCHAR(50) NOT NULL,
     logo VARCHAR(255),
     nombreOficial VARCHAR(100),
@@ -65,12 +65,16 @@ CREATE TABLE IF NOT EXISTS Publicacion (
     titulo VARCHAR(150) NOT NULL,
     contenido TEXT NOT NULL,
     urlMultimedia VARCHAR(255),
+    multimediaBlob LONGBLOB,
+    multimediaMimeType VARCHAR(50),
+    multimediaNombre VARCHAR(255),
     fechaPublicacion DATETIME DEFAULT CURRENT_TIMESTAMP,
     fechaAprobacion DATETIME NULL,
     estado ENUM('pendiente', 'aprobada', 'rechazada') DEFAULT 'pendiente',
     motivoRechazo TEXT NULL,
     likes INT DEFAULT 0,
     dislikes INT DEFAULT 0,
+    vistas INT DEFAULT 0,
     FOREIGN KEY (idUsuario) REFERENCES Usuario(idUsuario) ON DELETE CASCADE,
     FOREIGN KEY (idMundial) REFERENCES Mundial(idMundial) ON DELETE RESTRICT,
     FOREIGN KEY (idCategoria) REFERENCES Categoria(idCategoria) ON DELETE RESTRICT

@@ -96,13 +96,7 @@ function renderPosts() {
                 <p class="text-neutral-600 line-clamp-3">${post.contenido}</p>
             </div>
             
-            ${post.urlMultimedia ? `
-                <div class="mb-4">
-                    <img src="${post.urlMultimedia}" alt="${post.titulo}" 
-                         class="w-full h-48 object-cover rounded-lg"
-                         onerror="this.style.display='none'">
-                </div>
-            ` : ''}
+            ${getImageHTML(post)}
             
             <div class="flex items-center space-x-4 mb-4 text-sm text-neutral-600">
                 <span class="inline-flex items-center">
@@ -366,6 +360,34 @@ function showError(message) {
     setTimeout(() => {
         notification.remove();
     }, 3000);
+}
+
+/**
+ * Helper function para generar HTML de imagen de publicación
+ */
+function getImageHTML(post) {
+    const BASE_URL = 'http://localhost/PWCI/PWCI-Backend';
+    
+    if (post.tieneBlob && post.tieneBlob == 1) {
+        return `
+            <div class="mb-4">
+                <img src="${BASE_URL}/blob-api.php?action=download&tipo=publicacion&id=${post.idPublicacion}" 
+                     alt="${post.titulo}" 
+                     class="w-full h-48 object-cover rounded-lg"
+                     onerror="this.style.display='none'">
+            </div>
+        `;
+    } else if (post.urlMultimedia) {
+        return `
+            <div class="mb-4">
+                <img src="${post.urlMultimedia}" 
+                     alt="${post.titulo}" 
+                     class="w-full h-48 object-cover rounded-lg"
+                     onerror="this.style.display='none'">
+            </div>
+        `;
+    }
+    return '';
 }
 
 /**

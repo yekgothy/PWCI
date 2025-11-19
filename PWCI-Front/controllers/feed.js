@@ -7,24 +7,60 @@ const API_BASE_URL = 'http://localhost/PWCI/PWCI-Backend/api.php';
 // Estado global
 let currentUser = null;
 let allPosts = [];
+let filteredPosts = [];
+let categories = [];
+let worldCups = [];
 
 // ============================================
 // INICIALIZACIÓN
 // ============================================
+let isInitialized = false;
+
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('Inicializando feed...');
+    
+    // Esperar a que los elementos del DOM existan
+    await waitForElements();
     
     // Verificar autenticación
     currentUser = checkAuth();
     
-    // Cargar publicaciones
-    await loadPosts();
+    // Cargar datos iniciales
+    await Promise.all([
+        loadCategories(),
+        loadWorldCups(),
+        loadPosts()
+    ]);
     
-    // Configurar event listeners
+    // Configurar event listeners DESPUÉS de cargar todo
     setupEventListeners();
+    setupFilterListeners();
     
+    isInitialized = true;
     console.log('Feed inicializado correctamente');
 });
+
+// ============================================
+// ESPERAR A QUE LOS ELEMENTOS EXISTAN
+// ============================================
+function waitForElements() {
+    return new Promise((resolve) => {
+        const checkElements = () => {
+            const searchInput = document.getElementById('searchInput');
+            const categoryFilter = document.getElementById('categoryFilter');
+            const container = document.getElementById('main-content-container');
+            
+            if (searchInput && categoryFilter && container) {
+                console.log('✅ Elementos del DOM encontrados');
+                resolve();
+            } else {
+                console.log('⏳ Esperando elementos del DOM...');
+                setTimeout(checkElements, 100);
+            }
+        };
+        checkElements();
+    });
+}
 
 // ============================================
 // AUTENTICACIÓN
@@ -55,18 +91,10 @@ function getAuthToken() {
 // ============================================
 // CARGAR PUBLICACIONES
 // ============================================
-async function loadPosts(filters = {}) {
+async function loadPosts(shouldRender = true) {
     try {
-        // Construir URL con filtros
+        // Construir URL básica - los filtros se aplican después con applyFilters()
         let url = `${API_BASE_URL}/publicaciones?estado=aprobada`;
-        
-        if (filters.categoria) {
-            url += `&idCategoria=${filters.categoria}`;
-        }
-        
-        if (filters.ordenar) {
-            url += `&ordenar=${filters.ordenar}`;
-        }
         
         console.log('Cargando posts desde:', url);
         
@@ -103,10 +131,231 @@ async function loadPosts(filters = {}) {
             console.log('Ejemplo:', postsConInteraccion[0]);
         }
         
-        renderPosts(allPosts);
+        // Solo renderizar si se solicita (primera carga)
+        if (shouldRender) {
+            // Inicializar filteredPosts con todos los posts
+            filteredPosts = [...allPosts];
+            renderPosts(filteredPosts);
+            updateResultsCount();
+        }
     } catch (error) {
         console.error('Error cargando posts:', error);
         showError('Error de conexión con el servidor');
+    }
+}
+
+// ============================================
+// CARGAR CATEGORÍAS
+// ============================================
+async function loadCategories() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/categorias`);
+        const data = await response.json();
+        
+        categories = data.data || data || [];
+        console.log(`✅ ${categories.length} categorías cargadas`);
+        
+        populateCategoryFilter();
+    } catch (error) {
+        console.error('Error cargando categorías:', error);
+    }
+}
+
+function populateCategoryFilter() {
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (!categoryFilter) return;
+    
+    categories.forEach(cat => {
+        const option = document.createElement('option');
+        option.value = cat.idCategoria;
+        option.textContent = cat.nombre;
+        categoryFilter.appendChild(option);
+    });
+}
+
+// ============================================
+// CARGAR MUNDIALES
+// ============================================
+async function loadWorldCups() {
+    try {
+        const response = await fetch(`${API_BASE_URL}/mundiales`);
+        const data = await response.json();
+        
+        worldCups = data.data || data || [];
+        console.log(`✅ ${worldCups.length} mundiales cargados`);
+        
+        populateWorldCupFilter();
+    } catch (error) {
+        console.error('Error cargando mundiales:', error);
+    }
+}
+
+function populateWorldCupFilter() {
+    const worldCupFilter = document.getElementById('worldCupFilter');
+    if (!worldCupFilter) return;
+    
+    worldCups.forEach(wc => {
+        const option = document.createElement('option');
+        option.value = wc.idMundial;
+        option.textContent = `${wc.anio} - ${wc.paisSede}`;
+        worldCupFilter.appendChild(option);
+    });
+}
+
+// ============================================
+// CONFIGURAR FILTROS
+// ============================================
+function setupFilterListeners() {
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const worldCupFilter = document.getElementById('worldCupFilter');
+    const sortFilter = document.getElementById('sortFilter');
+    const clearFiltersBtn = document.getElementById('clearFiltersBtn');
+    
+    console.log('🎛️ Configurando filtros:', {
+        searchInput: !!searchInput,
+        categoryFilter: !!categoryFilter,
+        worldCupFilter: !!worldCupFilter,
+        sortFilter: !!sortFilter,
+        clearFiltersBtn: !!clearFiltersBtn
+    });
+    
+    // Búsqueda en tiempo real (con debounce)
+    let searchTimeout;
+    if (searchInput) {
+        searchInput.addEventListener('input', () => {
+            clearTimeout(searchTimeout);
+            searchTimeout = setTimeout(() => {
+                console.log('🔍 Búsqueda activada');
+                applyFilters();
+            }, 300);
+        });
+        console.log('✅ Event listener de búsqueda configurado');
+    }
+    
+    // Filtros de selección
+    if (categoryFilter) {
+        categoryFilter.addEventListener('change', () => {
+            console.log('📂 Filtro de categoría activado');
+            applyFilters();
+        });
+        console.log('✅ Event listener de categoría configurado');
+    }
+    
+    if (worldCupFilter) {
+        worldCupFilter.addEventListener('change', () => {
+            console.log('🏆 Filtro de mundial activado');
+            applyFilters();
+        });
+        console.log('✅ Event listener de mundial configurado');
+    }
+    
+    if (sortFilter) {
+        sortFilter.addEventListener('change', () => {
+            console.log('🔄 Ordenamiento activado');
+            applyFilters();
+        });
+        console.log('✅ Event listener de ordenamiento configurado');
+    }
+    
+    // Botón de limpiar
+    if (clearFiltersBtn) {
+        clearFiltersBtn.addEventListener('click', () => {
+            console.log('🧹 Limpiando filtros');
+            clearFilters();
+        });
+        console.log('✅ Event listener de limpiar configurado');
+    }
+}
+
+function applyFilters() {
+    if (!isInitialized || !allPosts || allPosts.length === 0) {
+        console.log('⏸️ Saltando filtros - no inicializado o sin posts');
+        return;
+    }
+    
+    const searchText = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    const categoryId = document.getElementById('categoryFilter')?.value || '';
+    const worldCupId = document.getElementById('worldCupFilter')?.value || '';
+    const sortBy = document.getElementById('sortFilter')?.value || 'recientes';
+    
+    console.log('🔍 Aplicando filtros:', { searchText, categoryId, worldCupId, sortBy });
+    
+    // Filtrar posts
+    filteredPosts = allPosts.filter(post => {
+        // Filtro de búsqueda
+        const matchesSearch = !searchText || 
+            (post.titulo && post.titulo.toLowerCase().includes(searchText)) ||
+            (post.contenido && post.contenido.toLowerCase().includes(searchText));
+        
+        // Filtro de categoría
+        const matchesCategory = !categoryId || 
+            post.idCategoria == categoryId;
+        
+        // Filtro de mundial
+        const matchesWorldCup = !worldCupId || 
+            post.idMundial == worldCupId;
+        
+        return matchesSearch && matchesCategory && matchesWorldCup;
+    });
+    
+    console.log('✅ Filtrados:', filteredPosts.length, 'de', allPosts.length);
+    
+    // Ordenar posts
+    sortPosts(filteredPosts, sortBy);
+    
+    // Renderizar
+    renderPosts(filteredPosts);
+    updateResultsCount();
+}
+
+function sortPosts(posts, sortBy) {
+    switch(sortBy) {
+        case 'recientes':
+            posts.sort((a, b) => new Date(b.fechaPublicacion) - new Date(a.fechaPublicacion));
+            break;
+        case 'antiguos':
+            posts.sort((a, b) => new Date(a.fechaPublicacion) - new Date(b.fechaPublicacion));
+            break;
+        case 'likes':
+            posts.sort((a, b) => (b.likes || 0) - (a.likes || 0));
+            break;
+        case 'comentarios':
+            posts.sort((a, b) => (b.totalComentarios || 0) - (a.totalComentarios || 0));
+            break;
+        case 'vistas':
+            posts.sort((a, b) => (b.vistas || 0) - (a.vistas || 0));
+            break;
+    }
+}
+
+function clearFilters() {
+    // Limpiar inputs
+    const searchInput = document.getElementById('searchInput');
+    const categoryFilter = document.getElementById('categoryFilter');
+    const worldCupFilter = document.getElementById('worldCupFilter');
+    const sortFilter = document.getElementById('sortFilter');
+    
+    if (searchInput) searchInput.value = '';
+    if (categoryFilter) categoryFilter.value = '';
+    if (worldCupFilter) worldCupFilter.value = '';
+    if (sortFilter) sortFilter.value = 'recientes';
+    
+    // Reaplicar filtros (sin filtros = mostrar todo)
+    applyFilters();
+}
+
+function updateResultsCount() {
+    const resultsCount = document.getElementById('resultsCount');
+    if (!resultsCount) return;
+    
+    const total = allPosts.length;
+    const showing = filteredPosts.length;
+    
+    if (showing === total) {
+        resultsCount.textContent = `Mostrando ${total} publicación${total !== 1 ? 'es' : ''}`;
+    } else {
+        resultsCount.textContent = `Mostrando ${showing} de ${total} publicación${total !== 1 ? 'es' : ''}`;
     }
 }
 
@@ -122,16 +371,36 @@ function renderPosts(posts) {
     }
     
     if (!posts || posts.length === 0) {
-        container.innerHTML = `
-            <div class="text-center py-12">
-                <div class="text-6xl mb-4">⚽</div>
-                <h3 class="text-2xl font-bold text-zinc-800 mb-2">No hay publicaciones aún</h3>
-                <p class="text-zinc-600">Sé el primero en compartir algo sobre el Mundial</p>
-                <a href="createPost.html" class="mt-4 inline-block px-6 py-3 bg-black text-white rounded-lg hover:bg-zinc-800 transition-colors">
-                    Crear Publicación
-                </a>
-            </div>
-        `;
+        // Determinar si es por filtros o no hay posts en absoluto
+        const hasFilters = document.getElementById('searchInput')?.value || 
+                          document.getElementById('categoryFilter')?.value ||
+                          document.getElementById('worldCupFilter')?.value;
+        
+        if (hasFilters && allPosts.length > 0) {
+            // No hay resultados por filtros
+            container.innerHTML = `
+                <div class="text-center py-12">
+                    <div class="text-6xl mb-4">🔍</div>
+                    <h3 class="text-2xl font-bold text-zinc-800 mb-2">No se encontraron publicaciones</h3>
+                    <p class="text-zinc-600">Intenta ajustar los filtros de búsqueda</p>
+                    <button onclick="clearFilters()" class="mt-4 inline-block px-6 py-3 bg-black text-white rounded-lg hover:bg-zinc-800 transition-colors">
+                        Limpiar filtros
+                    </button>
+                </div>
+            `;
+        } else {
+            // No hay posts en absoluto
+            container.innerHTML = `
+                <div class="text-center py-12">
+                    <div class="text-6xl mb-4">⚽</div>
+                    <h3 class="text-2xl font-bold text-zinc-800 mb-2">No hay publicaciones aún</h3>
+                    <p class="text-zinc-600">Sé el primero en compartir algo sobre el Mundial</p>
+                    <a href="createPost.html" class="mt-4 inline-block px-6 py-3 bg-black text-white rounded-lg hover:bg-zinc-800 transition-colors">
+                        Crear Publicación
+                    </a>
+                </div>
+            `;
+        }
         return;
     }
     
@@ -169,15 +438,8 @@ function createPostHTML(post) {
             </div>
             
             <!-- Imagen (si existe) -->
-            ${post.urlMultimedia ? `
-                <div class="px-6 pb-4">
-                    <img src="${post.urlMultimedia}" 
-                         alt="${post.titulo}" 
-                         class="w-full rounded-lg object-cover max-h-96 cursor-pointer hover:opacity-95 transition-opacity"
-                         onclick="goToPostDetail(${post.idPublicacion})"
-                         onerror="this.style.display='none'">
-                </div>
-            ` : ''}
+            ${getImageHTML(post)}
+            
             
             <!-- Interacciones -->
             <div class="px-6 pb-6">
@@ -211,6 +473,15 @@ function createPostHTML(post) {
                             </svg>
                             <span class="font-semibold">${post.totalComentarios || 0}</span>
                         </button>
+                        
+                        <!-- Vistas -->
+                        <div class="flex items-center space-x-2 text-zinc-600" title="Visualizaciones">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                            </svg>
+                            <span class="font-semibold">${post.vistas || 0}</span>
+                        </div>
                     </div>
                     
                     <!-- Ver detalles -->
@@ -273,7 +544,8 @@ async function handleLike(postId) {
             
             if (data.status === 200) {
                 console.log('✅ Like removido');
-                await loadPosts();
+                await loadPosts(false);
+                applyFilters(); // Reaplicar filtros después de recargar
             }
         } catch (error) {
             console.error('Error al quitar like:', error);
@@ -295,7 +567,8 @@ async function handleLike(postId) {
         
         if (data.status === 200 || data.status === 409) {
             console.log('✅ Like registrado');
-            await loadPosts();
+            await loadPosts(false);
+            applyFilters(); // Reaplicar filtros después de recargar
         } else {
             console.error('Error:', data.message);
         }
@@ -330,7 +603,8 @@ async function handleDislike(postId) {
             
             if (data.status === 200) {
                 console.log('✅ Dislike removido');
-                await loadPosts();
+                await loadPosts(false);
+                applyFilters(); // Reaplicar filtros después de recargar
             }
         } catch (error) {
             console.error('Error al quitar dislike:', error);
@@ -352,7 +626,8 @@ async function handleDislike(postId) {
         
         if (data.status === 200 || data.status === 409) {
             console.log('✅ Dislike registrado');
-            await loadPosts();
+            await loadPosts(false);
+            applyFilters(); // Reaplicar filtros después de recargar
         } else {
             console.error('Error:', data.message);
         }
@@ -419,5 +694,43 @@ function sortPosts(order) {
     // order puede ser: 'recientes', 'antiguos', 'populares'
     loadPosts({ ordenar: order });
 }
+
+// ============================================
+// HELPER: OBTENER HTML DE IMAGEN (BLOB O URL)
+// ============================================
+function getImageHTML(post) {
+    // Si tiene BLOB, usar blob-api.php
+    if (post.tieneBlob && post.tieneBlob == 1) {
+        const imageUrl = `http://localhost/PWCI/PWCI-Backend/blob-api.php?action=download&tipo=publicacion&id=${post.idPublicacion}`;
+        return `
+            <div class="px-6 pb-4">
+                <img src="${imageUrl}" 
+                     alt="${post.titulo}" 
+                     class="w-full rounded-lg object-cover max-h-96 cursor-pointer hover:opacity-95 transition-opacity"
+                     onclick="goToPostDetail(${post.idPublicacion})"
+                     onerror="console.error('Error cargando imagen BLOB'); this.style.display='none'">
+            </div>
+        `;
+    }
+    // Si tiene URL, usar URL
+    else if (post.urlMultimedia) {
+        return `
+            <div class="px-6 pb-4">
+                <img src="${post.urlMultimedia}" 
+                     alt="${post.titulo}" 
+                     class="w-full rounded-lg object-cover max-h-96 cursor-pointer hover:opacity-95 transition-opacity"
+                     onclick="goToPostDetail(${post.idPublicacion})"
+                     onerror="this.style.display='none'">
+            </div>
+        `;
+    }
+    // Sin imagen
+    return '';
+}
+
+// ============================================
+// EXPONER FUNCIONES GLOBALES PARA HTML
+// ============================================
+window.clearFilters = clearFilters;
 
 console.log('✅ Feed controller cargado');

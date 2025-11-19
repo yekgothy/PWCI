@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Mi Perfil - World Cup Hub</title>
-    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.tailwindcss.com?v=3.4.1"></script>
     <style>
         /* Skeleton loading animation */
         @keyframes shimmer {
@@ -49,7 +49,7 @@
                         <h1 id="profileName" class="text-3xl font-bold text-black mb-2">Cargando...</h1>
                         <p id="profileEmail" class="text-neutral-600 mb-4">Cargando...</p>
                         <a href="createPost.html" class="inline-block bg-black hover:bg-neutral-800 text-white px-6 py-2 rounded-lg transition-colors font-semibold">
-                            + Nueva PublicaciÃ³n
+                            + Nueva Publicación
                         </a>
                     </div>
                 </div>
@@ -148,7 +148,7 @@
 
     <!-- JavaScript para cargar componentes -->
     <script>
-        // FunciÃ³n para inicializar el navbar
+        // Función para inicializar el navbar
         function initializeNavbar() {
             const menuButton = document.getElementById('menuButton');
             const sidebarMenu = document.getElementById('sidebarMenu');
@@ -156,19 +156,19 @@
             const menuOverlay = document.getElementById('menuOverlay');
 
             if (menuButton && sidebarMenu) {
-                // Abrir menÃº hamburguesa
+                // Abrir menú hamburguesa
                 menuButton.addEventListener('click', function() {
                     sidebarMenu.classList.remove('hidden');
                 });
 
-                // Cerrar menÃº con botÃ³n X
+                // Cerrar menú con botón X
                 if (closeMenuButton) {
                     closeMenuButton.addEventListener('click', function() {
                         sidebarMenu.classList.add('hidden');
                     });
                 }
 
-                // Cerrar menÃº con overlay
+                // Cerrar menú con overlay
                 if (menuOverlay) {
                     menuOverlay.addEventListener('click', function() {
                         sidebarMenu.classList.add('hidden');
@@ -191,7 +191,7 @@
             .then(response => response.text())
             .then(data => {
                 document.getElementById('sidebar-left-container').innerHTML = data;
-                // Inicializar info del usuario en sidebar despuÃ©s de cargarlo
+                // Inicializar info del usuario en sidebar después de cargarlo
                 setTimeout(() => {
                     if (typeof initSidebarUserInfo === 'function') {
                         initSidebarUserInfo();

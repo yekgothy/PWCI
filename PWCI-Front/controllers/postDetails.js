@@ -35,6 +35,9 @@ document.addEventListener('DOMContentLoaded', async function() {
     await loadPost(postId);
     await loadComments(postId);
     
+    // Incrementar contador de vistas
+    await incrementViews(postId);
+    
     // Setup event listeners
     setupEventListeners();
 });
@@ -128,7 +131,20 @@ function renderPost(post) {
     
     // Update image
     const imageContainer = document.getElementById('postImageContainer');
-    if (post.urlMultimedia) {
+    
+    // Si tiene BLOB, usar blob-api.php
+    if (post.tieneBlob && post.tieneBlob == 1) {
+        const imageUrl = `http://localhost/PWCI/PWCI-Backend/blob-api.php?action=download&tipo=publicacion&id=${post.idPublicacion}`;
+        imageContainer.innerHTML = `
+            <img src="${imageUrl}" 
+                 alt="${post.titulo}" 
+                 class="w-full rounded-lg"
+                 onerror="console.error('Error cargando imagen BLOB'); this.parentElement.style.display='none'">
+        `;
+        imageContainer.style.display = 'block';
+    }
+    // Si tiene URL, usar URL
+    else if (post.urlMultimedia) {
         imageContainer.innerHTML = `
             <img src="${post.urlMultimedia}" 
                  alt="${post.titulo}" 
@@ -136,7 +152,9 @@ function renderPost(post) {
                  onerror="this.parentElement.style.display='none'">
         `;
         imageContainer.style.display = 'block';
-    } else {
+    }
+    // Sin imagen
+    else {
         imageContainer.style.display = 'none';
     }
     
@@ -144,6 +162,7 @@ function renderPost(post) {
     document.getElementById('likeCount').textContent = post.likes || 0;
     document.getElementById('dislikeCount').textContent = post.dislikes || 0;
     document.getElementById('commentCount').textContent = post.totalComentarios || 0;
+    document.getElementById('viewsCount').textContent = post.vistas || 0;
     
     // 🎨 ACTUALIZAR ESTADOS VISUALES DE LIKE/DISLIKE
     updateInteractionButtons(post.userInteraction);
@@ -480,6 +499,30 @@ function formatDate(dateString) {
     }
     const years = Math.floor(diffDays / 365);
     return `Hace ${years} año${years !== 1 ? 's' : ''}`;
+}
+
+// ============================================
+// INCREMENTAR VISTAS
+// ============================================
+async function incrementViews(postId) {
+    try {
+        // Llamar al stored procedure para incrementar vistas
+        const response = await fetch(`${API_BASE_URL}/publicaciones/${postId}/incrementar-vistas`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+        
+        const data = await response.json();
+        
+        if (data.status === 200) {
+            console.log('👁️ Vistas incrementadas:', data.vistas);
+        }
+    } catch (error) {
+        console.error('Error al incrementar vistas:', error);
+        // No mostrar error al usuario, es una operación silenciosa
+    }
 }
 
 function showError(message) {
