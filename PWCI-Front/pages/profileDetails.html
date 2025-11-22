@@ -40,19 +40,92 @@
                     <!-- Profile Photo -->
                     <div class="relative">
                         <div id="profilePhoto" class="w-24 h-24 rounded-full overflow-hidden bg-black flex items-center justify-center text-white text-3xl font-bold shadow-lg border-4 border-neutral-800">
-                            <span id="profileInitials"></span>
+                            <img id="profilePhotoImg" class="hidden w-full h-full object-cover" alt="Foto de perfil">
+                            <div id="profilePhotoFallback" class="w-full h-full flex items-center justify-center">
+                                <span id="profileInitials"></span>
+                            </div>
                         </div>
+                        <button id="changePhotoButton" class="absolute bottom-0 right-0 bg-white text-black text-xs font-semibold px-2 py-1 rounded-full shadow hover:bg-neutral-200 transition-colors">
+                            Cambiar foto
+                        </button>
+                        <input type="file" id="profilePhotoInput" accept="image/*" class="hidden">
                     </div>
 
                     <!-- Profile Info -->
                     <div class="flex-1 text-center md:text-left">
                         <h1 id="profileName" class="text-3xl font-bold text-black mb-2">Cargando...</h1>
                         <p id="profileEmail" class="text-neutral-600 mb-4">Cargando...</p>
-                        <a href="createPost.html" class="inline-block bg-black hover:bg-neutral-800 text-white px-6 py-2 rounded-lg transition-colors font-semibold">
-                            + Nueva Publicación
-                        </a>
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 text-sm text-neutral-500 mb-4">
+                            <div>
+                                <span class="block uppercase tracking-wide text-xs text-neutral-400">Fecha de nacimiento</span>
+                                <span id="profileBirthdate" class="text-neutral-700 font-semibold">-</span>
+                            </div>
+                            <div>
+                                <span class="block uppercase tracking-wide text-xs text-neutral-400">Genero</span>
+                                <span id="profileGender" class="text-neutral-700 font-semibold">-</span>
+                            </div>
+                            <div>
+                                <span class="block uppercase tracking-wide text-xs text-neutral-400">Pais de nacimiento</span>
+                                <span id="profileCountry" class="text-neutral-700 font-semibold">-</span>
+                            </div>
+                            <div>
+                                <span class="block uppercase tracking-wide text-xs text-neutral-400">Nacionalidad</span>
+                                <span id="profileNationality" class="text-neutral-700 font-semibold">-</span>
+                            </div>
+                        </div>
+                        <div class="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-start">
+                            <button id="editProfileButton" class="w-full sm:w-auto bg-neutral-200 hover:bg-neutral-300 text-neutral-800 px-6 py-2 rounded-lg transition-colors font-semibold">
+                                Editar perfil
+                            </button>
+                            <a href="createPost.html" class="inline-block w-full sm:w-auto bg-black hover:bg-neutral-800 text-white px-6 py-2 rounded-lg transition-colors font-semibold">
+                                + Nueva Publicacion
+                            </a>
+                        </div>
+                        <div id="photoUploadMessage" class="mt-3 text-sm text-neutral-600 hidden"></div>
                     </div>
                 </div>
+            </div>
+
+            <!-- Profile Edit Section -->
+            <div id="profileEditSection" class="hidden bg-white rounded-xl shadow-lg border border-neutral-200 p-6 mb-6">
+                <h2 class="text-xl font-semibold text-black mb-4">Editar informacion de perfil</h2>
+                <form id="profileEditForm" class="space-y-4">
+                    <div>
+                        <label class="block text-sm font-medium text-neutral-600 mb-2" for="editNombreCompleto">Nombre completo</label>
+                        <input id="editNombreCompleto" name="nombreCompleto" type="text" class="w-full px-4 py-3 bg-neutral-100 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500" placeholder="Tu nombre completo">
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-600 mb-2" for="editFechaNacimiento">Fecha de nacimiento</label>
+                            <input id="editFechaNacimiento" name="fechaNacimiento" type="date" class="w-full px-4 py-3 bg-neutral-100 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-600 mb-2" for="editGenero">Genero</label>
+                            <select id="editGenero" name="genero" class="w-full px-4 py-3 bg-neutral-100 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500">
+                                <option value="">Selecciona una opcion</option>
+                                <option value="Masculino">Masculino</option>
+                                <option value="Femenino">Femenino</option>
+                                <option value="No especificado">Prefiero no decir</option>
+                                <option value="Otro">Otro</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-600 mb-2" for="editPaisNacimiento">Pais de nacimiento</label>
+                            <input id="editPaisNacimiento" name="paisNacimiento" type="text" class="w-full px-4 py-3 bg-neutral-100 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500" placeholder="Ej. Mexico">
+                        </div>
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-600 mb-2" for="editNacionalidad">Nacionalidad</label>
+                            <input id="editNacionalidad" name="nacionalidad" type="text" class="w-full px-4 py-3 bg-neutral-100 border border-neutral-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-neutral-500" placeholder="Ej. Mexicana">
+                        </div>
+                    </div>
+                    <div id="editProfileMessage" class="hidden text-sm"></div>
+                    <div class="flex flex-col sm:flex-row gap-3 sm:justify-end">
+                        <button type="button" id="cancelEditProfile" class="w-full sm:w-auto bg-neutral-200 hover:bg-neutral-300 text-neutral-700 px-6 py-2 rounded-lg font-medium transition-colors">Cancelar</button>
+                        <button type="submit" id="saveEditProfile" class="w-full sm:w-auto bg-black hover:bg-neutral-800 text-white px-6 py-2 rounded-lg font-semibold transition-colors">Guardar cambios</button>
+                    </div>
+                </form>
             </div>
 
             <!-- Statistics Cards -->
@@ -143,12 +216,18 @@
     </div>
 
     <!-- Scripts: Cargar primero los controllers -->
+    <script src="../controllers/api-client.js"></script>
+    <script src="../controllers/auth.js"></script>
+    <script>protectPage();</script>
+    <script src="../controllers/avatar-utils.js"></script>
+    <script src="../controllers/session.js"></script>
+    <script src="../controllers/countdown.js"></script>
     <script src="../controllers/profile.js"></script>
     <script src="../controllers/sidebar.js"></script>
 
     <!-- JavaScript para cargar componentes -->
     <script>
-        // Función para inicializar el navbar
+        // Funciï¿½n para inicializar el navbar
         function initializeNavbar() {
             const menuButton = document.getElementById('menuButton');
             const sidebarMenu = document.getElementById('sidebarMenu');
@@ -156,19 +235,19 @@
             const menuOverlay = document.getElementById('menuOverlay');
 
             if (menuButton && sidebarMenu) {
-                // Abrir menú hamburguesa
+                // Abrir menï¿½ hamburguesa
                 menuButton.addEventListener('click', function() {
                     sidebarMenu.classList.remove('hidden');
                 });
 
-                // Cerrar menú con botón X
+                // Cerrar menï¿½ con botï¿½n X
                 if (closeMenuButton) {
                     closeMenuButton.addEventListener('click', function() {
                         sidebarMenu.classList.add('hidden');
                     });
                 }
 
-                // Cerrar menú con overlay
+                // Cerrar menï¿½ con overlay
                 if (menuOverlay) {
                     menuOverlay.addEventListener('click', function() {
                         sidebarMenu.classList.add('hidden');
@@ -183,6 +262,9 @@
             .then(data => {
                 document.getElementById('navbar').innerHTML = data;
                 initializeNavbar();
+                if (window.PWCI && window.PWCI.session) {
+                    window.PWCI.session.refreshUI();
+                }
             })
             .catch(error => console.error('Error cargando navbar:', error));
 
@@ -191,7 +273,7 @@
             .then(response => response.text())
             .then(data => {
                 document.getElementById('sidebar-left-container').innerHTML = data;
-                // Inicializar info del usuario en sidebar después de cargarlo
+                // Inicializar info del usuario en sidebar despuï¿½s de cargarlo
                 setTimeout(() => {
                     if (typeof initSidebarUserInfo === 'function') {
                         initSidebarUserInfo();
@@ -205,6 +287,9 @@
             .then(response => response.text())
             .then(data => {
                 document.getElementById('sidebar-right-container').innerHTML = data;
+                if (typeof initSidebar === 'function') {
+                    initSidebar();
+                }
             })
             .catch(error => console.error('Error cargando sidebar derecho:', error));
     </script>

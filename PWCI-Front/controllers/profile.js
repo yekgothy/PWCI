@@ -4,6 +4,7 @@
  */
 
 const API_BASE_URL = 'http://localhost/PWCI/PWCI-Backend/api.php';
+const BLOB_API_BASE_URL = 'http://localhost/PWCI/PWCI-Backend/blob-api.php';
 
 // Estado global
 let currentUser = null;
@@ -17,6 +18,125 @@ let userStats = {
     totalLikes: 0,
     totalComentarios: 0
 };
+let isEditingProfile = false;
+let isUploadingPhoto = false;
+
+function initPhotoUploadControls() {
+    const changeButton = document.getElementById('changePhotoButton');
+    const fileInput = document.getElementById('profilePhotoInput');
+
+    if (!changeButton || !fileInput) {
+        return;
+    }
+
+    changeButton.addEventListener('click', (event) => {
+        event.preventDefault();
+        if (isUploadingPhoto) return;
+        fileInput.click();
+    });
+
+    fileInput.addEventListener('change', async (event) => {
+        const file = event.target.files && event.target.files[0];
+        if (!file) {
+            return;
+        }
+        await handlePhotoUpload(file);
+        fileInput.value = '';
+    });
+}
+
+function validateImageFile(file) {
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/gif', 'image/webp'];
+    if (!allowedTypes.includes(file.type)) {
+        return 'Formato no permitido. Usa JPG, PNG, GIF o WEBP.';
+    }
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+        return 'La imagen debe pesar menos de 5MB.';
+    }
+    return null;
+}
+
+function setPhotoUploadMessage(message, type = 'info') {
+    const messageBox = document.getElementById('photoUploadMessage');
+    if (!messageBox) return;
+    if (!message) {
+        messageBox.classList.add('hidden');
+        messageBox.textContent = '';
+        messageBox.classList.remove('text-green-600', 'text-red-600', 'text-neutral-600');
+        return;
+    }
+    messageBox.textContent = message;
+    messageBox.classList.remove('hidden', 'text-green-600', 'text-red-600', 'text-neutral-600');
+    if (type === 'success') {
+        messageBox.classList.add('text-green-600');
+    } else if (type === 'error') {
+        messageBox.classList.add('text-red-600');
+    } else {
+        messageBox.classList.add('text-neutral-600');
+    }
+}
+
+function setPhotoUploadLoading(isLoading) {
+    isUploadingPhoto = isLoading;
+    const changeButton = document.getElementById('changePhotoButton');
+    if (changeButton) {
+        changeButton.disabled = isLoading;
+        changeButton.textContent = isLoading ? 'Subiendo...' : 'Cambiar foto';
+        changeButton.classList.toggle('opacity-70', isLoading);
+        changeButton.classList.toggle('cursor-not-allowed', isLoading);
+    }
+}
+
+async function handlePhotoUpload(file) {
+    setPhotoUploadMessage(null);
+    const validationError = validateImageFile(file);
+    if (validationError) {
+        setPhotoUploadMessage(validationError, 'error');
+        return;
+    }
+
+    if (!currentUser || !currentUser.idUsuario) {
+        setPhotoUploadMessage('No se encontró la sesión del usuario.', 'error');
+        return;
+    }
+
+    setPhotoUploadLoading(true);
+    setPhotoUploadMessage('Subiendo imagen...', 'info');
+
+    const formData = new FormData();
+    formData.append('imagen', file);
+    formData.append('tipo', 'perfil');
+    formData.append('id', currentUser.idUsuario);
+
+    try {
+        const response = await fetch(`${BLOB_API_BASE_URL}?action=upload`, {
+            method: 'POST',
+            body: formData
+        });
+
+        const result = await response.json().catch(() => null);
+
+        if (!response.ok || !result || result.status !== 200) {
+            throw new Error(result && result.message ? result.message : 'No se pudo subir la imagen.');
+        }
+
+        currentUser.tieneFotoBlob = 1;
+        currentUser.foto = null;
+
+        renderUserInfo({ cacheBust: true });
+        if (window.PWCI && window.PWCI.session) {
+            window.PWCI.session.setUserData(currentUser, { cacheBust: true });
+        }
+        setPhotoUploadMessage('Foto de perfil actualizada correctamente.', 'success');
+        setTimeout(() => setPhotoUploadMessage(null), 4000);
+    } catch (error) {
+        console.error('Error subiendo foto de perfil:', error);
+        setPhotoUploadMessage(error.message || 'Error al subir la foto.', 'error');
+    } finally {
+        setPhotoUploadLoading(false);
+    }
+}
 
 /**
  * Verificar autenticación
@@ -58,20 +178,208 @@ async function loadProfile() {
 /**
  * Renderizar información del usuario
  */
-function renderUserInfo() {
+function renderUserInfo(options = {}) {
+    const { cacheBust = false } = options;
     const profileName = document.getElementById('profileName');
     const profileEmail = document.getElementById('profileEmail');
     const profileInitials = document.getElementById('profileInitials');
+    const profilePhotoImg = document.getElementById('profilePhotoImg');
+    const profilePhotoFallback = document.getElementById('profilePhotoFallback');
     const profilePhoto = document.getElementById('profilePhoto');
+    const profileBirthdate = document.getElementById('profileBirthdate');
+    const profileGender = document.getElementById('profileGender');
+    const profileCountry = document.getElementById('profileCountry');
+    const profileNationality = document.getElementById('profileNationality');
     
     if (profileName) profileName.textContent = currentUser.nombreCompleto || 'Usuario';
     if (profileEmail) profileEmail.textContent = currentUser.correoElectronico || '';
+    if (profileBirthdate) profileBirthdate.textContent = formatBirthdate(currentUser.fechaNacimiento);
+    if (profileGender) profileGender.textContent = formatOptional(currentUser.genero);
+    if (profileCountry) profileCountry.textContent = formatOptional(currentUser.paisNacimiento);
+    if (profileNationality) profileNationality.textContent = formatOptional(currentUser.nacionalidad);
     
     // Siempre mostrar iniciales (no tenemos foto de perfil implementada aún)
+    const initials = getInitials(currentUser.nombreCompleto);
     if (profileInitials) {
-        const initials = getInitials(currentUser.nombreCompleto);
         profileInitials.textContent = initials;
-        console.log('Iniciales establecidas:', initials);
+    }
+
+    if (window.PWCI && window.PWCI.avatar && profilePhotoImg && profilePhotoFallback) {
+        const avatarUrl = window.PWCI.avatar.getAvatarUrl({
+            id: currentUser.idUsuario,
+            foto: currentUser.foto,
+            hasBlob: currentUser.tieneFotoBlob
+        }, { cacheBust });
+        window.PWCI.avatar.applyAvatar(profilePhotoImg, profilePhotoFallback, avatarUrl);
+    } else if (profilePhoto) {
+        profilePhoto.classList.add('bg-black');
+    }
+}
+
+function populateProfileEditForm() {
+    const nameInput = document.getElementById('editNombreCompleto');
+    const birthInput = document.getElementById('editFechaNacimiento');
+    const generoSelect = document.getElementById('editGenero');
+    const countryInput = document.getElementById('editPaisNacimiento');
+    const nationalityInput = document.getElementById('editNacionalidad');
+
+    if (nameInput) nameInput.value = currentUser.nombreCompleto || '';
+    if (birthInput) birthInput.value = currentUser.fechaNacimiento ? currentUser.fechaNacimiento.split('T')[0] : '';
+    if (generoSelect) generoSelect.value = currentUser.genero || '';
+    if (countryInput) countryInput.value = currentUser.paisNacimiento || '';
+    if (nationalityInput) nationalityInput.value = currentUser.nacionalidad || '';
+}
+
+function toggleProfileEdit(forceState = null) {
+    const section = document.getElementById('profileEditSection');
+    if (!section) return;
+
+    const nextState = forceState !== null ? forceState : !isEditingProfile;
+    isEditingProfile = nextState;
+
+    const messageBox = document.getElementById('editProfileMessage');
+    if (messageBox) {
+        messageBox.classList.add('hidden');
+        messageBox.textContent = '';
+        messageBox.classList.remove('text-red-600', 'text-green-600');
+    }
+
+    if (nextState) {
+        populateProfileEditForm();
+        section.classList.remove('hidden');
+        section.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    } else {
+        section.classList.add('hidden');
+    }
+}
+
+function cancelProfileEdit() {
+    toggleProfileEdit(false);
+}
+
+function setEditProfileLoading(isLoading) {
+    const saveButton = document.getElementById('saveEditProfile');
+    const cancelButton = document.getElementById('cancelEditProfile');
+    if (saveButton) {
+        saveButton.disabled = isLoading;
+        saveButton.textContent = isLoading ? 'Guardando...' : 'Guardar cambios';
+        saveButton.classList.toggle('opacity-70', isLoading);
+        saveButton.classList.toggle('cursor-not-allowed', isLoading);
+    }
+    if (cancelButton) {
+        cancelButton.disabled = isLoading;
+        cancelButton.classList.toggle('opacity-70', isLoading);
+        cancelButton.classList.toggle('cursor-not-allowed', isLoading);
+    }
+}
+
+function setEditProfileMessage(message, type = 'error') {
+    const messageBox = document.getElementById('editProfileMessage');
+    if (!messageBox) return;
+    messageBox.textContent = message;
+    messageBox.classList.remove('hidden');
+    messageBox.classList.remove('text-red-600', 'text-green-600', 'text-neutral-600');
+    if (type === 'success') {
+        messageBox.classList.add('text-green-600');
+    } else if (type === 'info') {
+        messageBox.classList.add('text-neutral-600');
+    } else {
+        messageBox.classList.add('text-red-600');
+    }
+}
+
+function validateProfileForm(values) {
+    if (!values.nombreCompleto || values.nombreCompleto.length < 3) {
+        return 'El nombre completo debe tener al menos 3 caracteres';
+    }
+
+    if (!values.fechaNacimiento) {
+        return 'Debes seleccionar tu fecha de nacimiento';
+    }
+
+    const birthDate = new Date(values.fechaNacimiento);
+    if (Number.isNaN(birthDate.getTime())) {
+        return 'La fecha de nacimiento no es valida';
+    }
+
+    const today = new Date();
+    if (birthDate > today) {
+        return 'La fecha de nacimiento no puede ser en el futuro';
+    }
+
+    const minAge = 12;
+    const age = today.getFullYear() - birthDate.getFullYear() - ((today.getMonth() < birthDate.getMonth() || (today.getMonth() === birthDate.getMonth() && today.getDate() < birthDate.getDate())) ? 1 : 0);
+    if (age < minAge) {
+        return 'Debes tener al menos 12 años';
+    }
+
+    return null;
+}
+
+async function handleProfileSave(event) {
+    event.preventDefault();
+
+    const form = event.target;
+    const values = {
+        nombreCompleto: form.nombreCompleto ? form.nombreCompleto.value.trim() : '',
+        fechaNacimiento: form.fechaNacimiento ? form.fechaNacimiento.value : '',
+        genero: form.genero ? form.genero.value.trim() : '',
+        paisNacimiento: form.paisNacimiento ? form.paisNacimiento.value.trim() : '',
+        nacionalidad: form.nacionalidad ? form.nacionalidad.value.trim() : ''
+    };
+
+    const validationError = validateProfileForm(values);
+    if (validationError) {
+        setEditProfileMessage(validationError, 'error');
+        return;
+    }
+
+    const payload = {
+        nombreCompleto: values.nombreCompleto,
+        fechaNacimiento: values.fechaNacimiento,
+        genero: values.genero || null,
+        paisNacimiento: values.paisNacimiento || null,
+        nacionalidad: values.nacionalidad || null
+    };
+
+    try {
+        setEditProfileLoading(true);
+        setEditProfileMessage('Guardando cambios...', 'info');
+
+        const authToken = localStorage.getItem('authToken');
+        if (!authToken) {
+            throw new Error('Sesion expirada');
+        }
+
+        const response = await fetch(`${API_BASE_URL}/usuarios/${currentUser.idUsuario}`, {
+            method: 'PUT',
+            headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${authToken}`
+            },
+            body: JSON.stringify(payload)
+        });
+
+        const data = await response.json().catch(() => ({}));
+
+        if (!response.ok) {
+            const message = data && data.message ? data.message : 'No se pudo actualizar el perfil';
+            throw new Error(message);
+        }
+
+        setEditProfileMessage('Perfil actualizado correctamente', 'success');
+        showSuccess('Perfil actualizado correctamente');
+
+        // Volver a cargar la informacion del usuario y publicaciones
+        await loadUserPosts(currentFilter);
+        calculateStats();
+
+        toggleProfileEdit(false);
+    } catch (error) {
+        console.error('Error al actualizar perfil:', error);
+        setEditProfileMessage(error.message || 'No se pudo actualizar el perfil', 'error');
+    } finally {
+        setEditProfileLoading(false);
     }
 }
 
@@ -94,6 +402,24 @@ async function loadUserPosts(estado = 'todas') {
         }
         
         const data = await response.json();
+        
+        if (data.data) {
+            const userInfo = {
+                nombreCompleto: data.data.nombreCompleto,
+                correoElectronico: data.data.correoElectronico,
+                fechaNacimiento: data.data.fechaNacimiento,
+                genero: data.data.genero,
+                paisNacimiento: data.data.paisNacimiento,
+                nacionalidad: data.data.nacionalidad,
+                foto: data.data.foto,
+                tieneFotoBlob: data.data.tieneFotoBlob
+            };
+            currentUser = { ...currentUser, ...userInfo };
+            if (window.PWCI && window.PWCI.session) {
+                window.PWCI.session.setUserData(currentUser);
+            }
+            renderUserInfo();
+        }
         
         // Guardar todas las publicaciones del usuario
         const allPosts = data.data.publicaciones || [];
@@ -369,6 +695,22 @@ function formatDate(dateString) {
     return date.toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' });
 }
 
+function formatBirthdate(dateString) {
+    if (!dateString) return 'Sin registro';
+    const date = new Date(dateString);
+    if (Number.isNaN(date.getTime())) {
+        return 'Sin registro';
+    }
+    return date.toLocaleDateString('es-ES', { day: '2-digit', month: 'short', year: 'numeric' });
+}
+
+function formatOptional(value) {
+    if (value === undefined || value === null || String(value).trim() === '') {
+        return 'Sin registro';
+    }
+    return value;
+}
+
 function getStatusBadgeClass(estado) {
     switch (estado) {
         case 'pendiente':
@@ -424,6 +766,8 @@ document.addEventListener('DOMContentLoaded', () => {
     // Verificar autenticación
     if (!checkAuth()) return;
     
+    initPhotoUploadControls();
+
     // Cargar perfil
     loadProfile();
     
@@ -433,4 +777,21 @@ document.addEventListener('DOMContentLoaded', () => {
             changeFilter(tab.dataset.filter);
         });
     });
+
+    // Inicializar edición de perfil
+    const editButton = document.getElementById('editProfileButton');
+    const cancelButton = document.getElementById('cancelEditProfile');
+    const editForm = document.getElementById('profileEditForm');
+
+    if (editButton) {
+        editButton.addEventListener('click', () => toggleProfileEdit());
+    }
+
+    if (cancelButton) {
+        cancelButton.addEventListener('click', cancelProfileEdit);
+    }
+
+    if (editForm) {
+        editForm.addEventListener('submit', handleProfileSave);
+    }
 });

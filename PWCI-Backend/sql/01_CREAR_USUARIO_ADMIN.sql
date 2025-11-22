@@ -3,13 +3,13 @@
 -- World Cup Hub - Sistema de Administración
 -- =====================================================
 -- EJECUTAR ESTE ARCHIVO DESPUÉS DE CREAR LA BASE DE DATOS
--- Contraseña del admin: password1
+-- Contraseña del admin: admin123
 -- =====================================================
 
 USE BDM;
 
 -- Eliminar admin anterior si existe
-DELETE FROM Usuario WHERE correoElectronico = 'admin@worldcuphub.com';
+DELETE FROM Usuario WHERE correoElectronico = 'admin@admin.worldcup';
 
 -- Crear usuario administrador
 INSERT INTO Usuario (
@@ -30,8 +30,8 @@ INSERT INTO Usuario (
     'Masculino',
     'México',
     'Mexicana',
-    'admin@worldcuphub.com',
-    '$2y$10$q3IJwvQXvHby3GhL3VEje.OudeVATracShi1JYM/nhP.uHET1ivGy',  -- Contraseña: password1
+    'admin@admin.worldcup',
+    '$2y$10$MlJNQOWSxsjIK.E1dAAwY.G0ZgjvYiOZlePqF3QIO8Vey4axqSqEG',  -- Contraseña: admin123 (password_hash, cost 10)
     NULL,
     'admin',
     TRUE,
@@ -49,5 +49,5 @@ FROM Usuario
 WHERE rol = 'admin';
 
 SELECT '✅ Usuario administrador creado exitosamente' as status;
-SELECT 'Email: admin@worldcuphub.com' as info;
+SELECT 'Email: admin@admin.worldcup' as info;
 SELECT 'Contraseña temporal: admin123 (cámbiala después del primer login)' as warning;

@@ -1,8 +1,8 @@
 // Cliente API con Interceptor de Autenticación
-const API_BASE_URL = 'http://localhost/PWCI/PWCI-Backend/api.php';
+const DEFAULT_API_BASE_URL = 'http://localhost/PWCI/PWCI-Backend/api.php';
 
 class APIClient {
-    constructor(baseURL = API_BASE_URL) {
+    constructor(baseURL = DEFAULT_API_BASE_URL) {
         this.baseURL = baseURL;
     }
 
@@ -160,14 +160,13 @@ const AuthAPI = {
         const response = await api.post('/auth/register', userData);
         
         if (response.data) {
-            const user = {
-                idUsuario: response.data.idUsuario,
-                nombreCompleto: response.data.nombreCompleto,
-                correoElectronico: response.data.correoElectronico,
-                rol: response.data.rol
-            };
-            localStorage.setItem('userData', JSON.stringify(user));
-            localStorage.setItem('authToken', response.data.token);
+            const user = response.data.user || null;
+            if (user) {
+                localStorage.setItem('userData', JSON.stringify(user));
+            }
+            if (response.data.token) {
+                localStorage.setItem('authToken', response.data.token);
+            }
             localStorage.setItem('loginTime', new Date().toISOString());
         }
         
@@ -210,6 +209,10 @@ const CommentAPI = {
 
     async create(commentData) {
         return await api.post('/comentarios', commentData);
+    },
+
+    async report(commentId, payload) {
+        return await api.post(`/comentarios/${commentId}/reportes`, payload);
     }
 };
 

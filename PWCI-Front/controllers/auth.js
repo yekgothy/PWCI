@@ -1,6 +1,25 @@
 // Utilidades de autenticación y sesiones
 const API_URL = 'http://localhost/PWCI/PWCI-Backend/api.php';
 
+function resolveAppUrl(page) {
+    try {
+        const path = window.location.pathname || '';
+        if (path.includes('/PWCI-Front/pages/')) {
+            return page;
+        }
+        if (path.includes('/PWCI-Front/admin/')) {
+            return `../pages/${page}`;
+        }
+        if (path.includes('/PWCI-Front/')) {
+            return `pages/${page}`;
+        }
+        return `/PWCI/PWCI-Front/pages/${page}`;
+    } catch (error) {
+        console.error('Error resolviendo ruta de la app:', error);
+        return page;
+    }
+}
+
 function getUserData() {
     try {
         const userData = localStorage.getItem('userData');
@@ -47,7 +66,7 @@ function logout(redirect = true) {
         localStorage.removeItem('loginTime');
         
         if (redirect) {
-            window.location.href = 'login.html';
+            window.location.href = resolveAppUrl('login.html');
         }
     } catch (error) {
         console.error('Error al cerrar sesión:', error);
@@ -84,7 +103,7 @@ function protectPage(requireAdmin = false) {
     
     if (requireAdmin && !isAdmin()) {
         alert('No tienes permisos para acceder a esta página');
-        window.location.href = 'feed.html';
+        window.location.href = resolveAppUrl('feed.html');
     }
 }
 

@@ -10,24 +10,24 @@
                 <a href="../pages/landingPage.html" class="block p-3 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors">Inicio</a>
             </li>
             <li>
-                <a href="../pages/home.html" class="block p-3 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors">Noticias Oficiales FIFA</a>
-            </li>
-            <li>
                 <a href="../pages/feed.html" class="block p-3 rounded-lg bg-zinc-800 text-white font-semibold">WCH HUB Feed</a>
             </li>
             <li>
                 <a href="../pages/createPost.html" class="block p-3 rounded-lg text-zinc-400 hover:bg-zinc-800 hover:text-white transition-colors">Crear Post</a>
             </li>
-            <li>
-                <a href="../admin/adminPanel.html" class="block p-3 rounded-lg text-yellow-400 hover:bg-zinc-800 hover:text-yellow-300 transition-colors">Panel Admin</a>
+            <li id="adminPanelItem" class="hidden">
+                <a id="adminPanelLink" href="../admin/adminPanel.html" class="block p-3 rounded-lg text-yellow-400 hover:bg-zinc-800 hover:text-yellow-300 transition-colors">Panel Admin</a>
             </li>
         </ul>
     </nav>
 
     <div class="mt-auto border-t border-zinc-800 pt-4 flex-shrink-0">
         <a href="../pages/profileDetails.html" class="flex items-center p-2 rounded-lg hover:bg-zinc-800 transition-colors cursor-pointer">
-            <div class="w-9 h-9 bg-zinc-700 rounded-full flex items-center justify-center">
-                <span id="sidebarUserInitials" class="text-white font-semibold text-sm"></span>
+            <div class="relative w-9 h-9 flex items-center justify-center">
+                <img id="sidebarUserAvatar" class="hidden w-9 h-9 rounded-full object-cover border border-zinc-600/60" alt="Foto de perfil">
+                <div id="sidebarUserAvatarFallback" class="w-9 h-9 bg-zinc-700 rounded-full flex items-center justify-center">
+                    <span id="sidebarUserInitials" class="text-white font-semibold text-sm"></span>
+                </div>
             </div>
             <div class="ml-3">
                 <p id="sidebarUserName" class="font-semibold text-white text-sm">Mi Perfil</p>

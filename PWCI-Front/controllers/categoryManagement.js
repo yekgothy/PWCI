@@ -220,8 +220,9 @@ async function handleSubmitCategory(e) {
     console.log('🔍 Datos del formulario:', { nombre, descripcion, color });
     console.log('🔍 Editando categoría:', editingCategory);
     
-    if (!nombre) {
-        alert('El nombre es requerido');
+    const validationError = validateCategoryForm({ nombre, descripcion, color });
+    if (validationError) {
+        alert(validationError);
         return;
     }
     
@@ -328,4 +329,24 @@ function showSuccess(message) {
     console.log(message);
     // Podrías agregar un toast o notificación aquí
     alert(message);
+}
+
+function validateCategoryForm({ nombre, descripcion, color }) {
+    if (!nombre) {
+        return 'El nombre de la categoría es obligatorio.';
+    }
+    if (nombre.length < 3) {
+        return 'El nombre debe tener al menos 3 caracteres.';
+    }
+    if (nombre.length > 100) {
+        return 'El nombre no puede superar los 100 caracteres.';
+    }
+    if (descripcion && descripcion.length > 300) {
+        return 'La descripción no puede superar los 300 caracteres.';
+    }
+    const hexColorRegex = /^#([0-9a-fA-F]{3}){1,2}$/;
+    if (color && !hexColorRegex.test(color)) {
+        return 'Selecciona un color hexadecimal válido.';
+    }
+    return null;
 }

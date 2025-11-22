@@ -226,8 +226,19 @@ async function handleSubmitWorldCup(e) {
     console.log('🔍 Editando mundial:', editingWorldCup);
     console.log('🔍 Datos del formulario:', { anio, paisSede, nombreOficial });
     
-    if (!anio || !paisSede) {
-        alert('Año y país sede son requeridos');
+    const validationError = validateWorldCupForm({
+        anio,
+        paisSede,
+        nombreOficial,
+        logo,
+        descripcion,
+        fechaInicio,
+        fechaFin,
+        numeroEquipos,
+        estado
+    });
+    if (validationError) {
+        alert(validationError);
         return;
     }
     
@@ -367,4 +378,61 @@ function showSuccess(message) {
 
 function showError(message) {
     alert('❌ ' + message);
+}
+
+function validateWorldCupForm({ anio, paisSede, nombreOficial, logo, descripcion, fechaInicio, fechaFin, numeroEquipos, estado }) {
+    if (!anio || Number.isNaN(anio)) {
+        return 'Indica un año válido (por ejemplo 2026).';
+    }
+    if (anio < 1930 || anio > 2100) {
+        return 'El año debe estar entre 1930 y 2100.';
+    }
+    if (!paisSede) {
+        return 'El país sede es obligatorio.';
+    }
+    if (paisSede.length < 3) {
+        return 'El país sede debe tener al menos 3 caracteres.';
+    }
+    if (paisSede.length > 120) {
+        return 'El país sede no puede superar los 120 caracteres.';
+    }
+    if (nombreOficial && nombreOficial.length > 150) {
+        return 'El nombre oficial no puede superar los 150 caracteres.';
+    }
+    if (logo && !isValidUrl(logo)) {
+        return 'La URL del logo no es válida.';
+    }
+    if (descripcion && descripcion.length > 600) {
+        return 'La descripción no puede superar los 600 caracteres.';
+    }
+    if (fechaInicio && Number.isNaN(Date.parse(fechaInicio))) {
+        return 'La fecha de inicio no es válida.';
+    }
+    if (fechaFin && Number.isNaN(Date.parse(fechaFin))) {
+        return 'La fecha de fin no es válida.';
+    }
+    if (fechaInicio && fechaFin) {
+        const start = new Date(fechaInicio);
+        const end = new Date(fechaFin);
+        if (start > end) {
+            return 'La fecha de inicio no puede ser posterior a la fecha de fin.';
+        }
+    }
+    if (Number.isNaN(numeroEquipos) || numeroEquipos < 8 || numeroEquipos > 128) {
+        return 'El número de equipos debe estar entre 8 y 128.';
+    }
+    const estadosValidos = ['proximo', 'en_curso', 'finalizado'];
+    if (!estadosValidos.includes(estado)) {
+        return 'Selecciona un estado válido.';
+    }
+    return null;
+}
+
+function isValidUrl(value) {
+    try {
+        const url = new URL(value);
+        return ['http:', 'https:'].includes(url.protocol);
+    } catch (_) {
+        return false;
+    }
 }

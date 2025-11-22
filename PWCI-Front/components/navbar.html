@@ -25,8 +25,16 @@
       </div>
       
       <!-- Mostrar cuando SÍ está autenticado -->
-      <div id="userMenu" class="hidden flex items-center space-x-3">
-        <span id="navUserName" class="text-white text-sm font-medium"></span>
+      <div id="userMenu" class="hidden items-center space-x-3">
+        <div class="flex items-center space-x-2">
+          <div class="relative w-9 h-9 flex items-center justify-center">
+            <img id="navUserAvatar" class="hidden w-9 h-9 rounded-full object-cover border border-white/20" alt="Foto de perfil">
+            <div id="navUserAvatarFallback" class="w-9 h-9 rounded-full bg-white/10 flex items-center justify-center">
+              <span id="navUserInitials" class="text-white font-semibold text-sm"></span>
+            </div>
+          </div>
+          <span id="navUserName" class="text-white text-sm font-medium"></span>
+        </div>
         <button id="logoutButton" class="px-3 py-2 bg-red-600 text-white hover:bg-red-700 transition-colors rounded text-sm font-medium">
           Cerrar Sesión
         </button>

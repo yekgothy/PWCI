@@ -8,7 +8,19 @@
  * @author PWCI Team
  */
 
-header('Access-Control-Allow-Origin: *');
+if (function_exists('header_remove')) {
+    header_remove('Access-Control-Allow-Origin');
+    header_remove('Access-Control-Allow-Methods');
+    header_remove('Access-Control-Allow-Headers');
+}
+
+$origin = isset($_SERVER['HTTP_ORIGIN']) ? trim((string)$_SERVER['HTTP_ORIGIN']) : '';
+if ($origin === '' || $origin === 'null') {
+    $origin = '*';
+}
+
+header('Access-Control-Allow-Origin: ' . $origin);
+header('Vary: Origin');
 header('Access-Control-Allow-Methods: GET, POST, PUT, DELETE, OPTIONS');
 header('Access-Control-Allow-Headers: Content-Type, Authorization');
 header('Content-Type: application/json; charset=utf-8');
@@ -19,6 +31,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'OPTIONS') {
 }
 
 require_once 'config/database.php';
+require_once __DIR__ . '/utils/FifaArchiveService.php';
 
 // ============================================
 // UTILIDADES
@@ -168,6 +181,9 @@ switch ($endpoint) {
     case 'comentarios':
         handleComentarios($method, $request, $input);
         break;
+    case 'reportes-comentarios':
+        handleReportesComentarios($method, $request, $input);
+        break;
     case 'categorias':
         handleCategorias($method, $request, $input);
         break;
@@ -176,6 +192,9 @@ switch ($endpoint) {
         break;
     case 'interacciones':
         handleInteracciones($method, $request, $input);
+        break;
+    case 'externo':
+        handleExternal($method, $request, $input);
         break;
     default:
         sendError('Endpoint no encontrado', 404);
@@ -215,6 +234,17 @@ function handleRegister($method, $input) {
     
     // Hashear contraseña
     $hashedPassword = password_hash($input['contrasena'], PASSWORD_DEFAULT);
+
+    // Normalizar campos opcionales
+    $genero = isset($input['genero']) ? trim((string)$input['genero']) : null;
+    $paisNacimiento = isset($input['paisNacimiento']) ? trim((string)$input['paisNacimiento']) : null;
+    $nacionalidad = isset($input['nacionalidad']) ? trim((string)$input['nacionalidad']) : null;
+    $foto = isset($input['foto']) ? trim((string)$input['foto']) : null;
+
+    $genero = $genero === '' ? null : $genero;
+    $paisNacimiento = $paisNacimiento === '' ? null : $paisNacimiento;
+    $nacionalidad = $nacionalidad === '' ? null : $nacionalidad;
+    $foto = $foto === '' ? null : $foto;
     
     // Crear usuario
     $idUsuario = executeSP('sp_registrar_usuario', [
@@ -222,20 +252,39 @@ function handleRegister($method, $input) {
         $input['correoElectronico'],
         $hashedPassword,
         $input['fechaNacimiento'],
-        $input['foto'] ?? null
+        $genero,
+        $paisNacimiento,
+        $nacionalidad,
+        $foto
     ]);
     
     if ($idUsuario) {
         $token = createToken($idUsuario, $input['correoElectronico'], 'usuario');
-        
+
+        $usuarioRegistrado = callStoredProcedure('sp_obtener_usuario_por_id', [$idUsuario]);
+        $usuarioData = $usuarioRegistrado[0] ?? [
+            'idUsuario' => $idUsuario,
+            'nombreCompleto' => $input['nombreCompleto'],
+            'correoElectronico' => $input['correoElectronico'],
+            'fechaNacimiento' => $input['fechaNacimiento'],
+            'genero' => $genero,
+            'paisNacimiento' => $paisNacimiento,
+            'nacionalidad' => $nacionalidad,
+            'foto' => $foto,
+            'tieneFotoBlob' => 0,
+            'rol' => 'usuario'
+        ];
+
+        if (!isset($usuarioData['rol'])) {
+            $usuarioData['rol'] = 'usuario';
+        }
+        if (!isset($usuarioData['tieneFotoBlob'])) {
+            $usuarioData['tieneFotoBlob'] = 0;
+        }
+
         sendResponse([
             'token' => $token,
-            'user' => [
-                'idUsuario' => $idUsuario,
-                'nombreCompleto' => $input['nombreCompleto'],
-                'correoElectronico' => $input['correoElectronico'],
-                'rol' => 'usuario'
-            ]
+            'user' => $usuarioData
         ], 201, 'Usuario registrado correctamente');
     } else {
         sendError('Error al registrar usuario', 500);
@@ -306,6 +355,10 @@ function handleUsuarios($method, $request, $input) {
                 }
                 
                 unset($usuario[0]['contrasena']);  // CORREGIDO: era 'contrasenia'
+
+                if (!isset($usuario[0]['tieneFotoBlob'])) {
+                    $usuario[0]['tieneFotoBlob'] = 0;
+                }
                 
                 // Obtener estadísticas
                 $stats = callStoredProcedure('sp_obtener_estadisticas_usuario', [$id]);
@@ -344,11 +397,20 @@ function handleUsuarios($method, $request, $input) {
             }
             
             // Actualizar perfil
-            if (isset($input['nombreCompleto']) || isset($input['fechaNacimiento'])) {
+            if (
+                isset($input['nombreCompleto']) ||
+                isset($input['fechaNacimiento']) ||
+                isset($input['genero']) ||
+                isset($input['paisNacimiento']) ||
+                isset($input['nacionalidad'])
+            ) {
                 $result = executeSP('sp_actualizar_perfil_usuario', [
                     $id,
                     $input['nombreCompleto'] ?? null,
-                    $input['fechaNacimiento'] ?? null
+                    $input['fechaNacimiento'] ?? null,
+                    $input['genero'] ?? null,
+                    $input['paisNacimiento'] ?? null,
+                    $input['nacionalidad'] ?? null
                 ]);
             }
             
@@ -568,12 +630,20 @@ function handlePublicacionesAdmin($method, $request, $input) {
 // ============================================
 
 function handleComentarios($method, $request, $input) {
+    // Rutas específicas: /comentarios/{id}/reportes
+    if (isset($request[1]) && isset($request[2]) && $request[2] === 'reportes') {
+        handleComentarioReportesUsuario($method, $request, $input);
+        return;
+    }
+
     switch ($method) {
         case 'GET':
             if (isset($_GET['idPublicacion'])) {
                 // Obtener comentarios de una publicación específica
                 $idPublicacion = (int)$_GET['idPublicacion'];
-                $comentarios = callStoredProcedure('sp_obtener_comentarios', [$idPublicacion]);
+                $usuarioAutenticado = validateToken();
+                $idUsuario = $usuarioAutenticado ? $usuarioAutenticado['idUsuario'] : null;
+                $comentarios = callStoredProcedure('sp_obtener_comentarios', [$idPublicacion, $idUsuario]);
                 sendResponse($comentarios, 200, 'Comentarios obtenidos correctamente');
             } else {
                 // Obtener TODOS los comentarios (para admin dashboard)
@@ -614,6 +684,16 @@ function handleComentarios($method, $request, $input) {
             if (!$input || empty($input['contenido'])) {
                 sendError('Contenido requerido', 400);
             }
+
+             $comentario = callStoredProcedure('sp_obtener_comentario_por_id', [$id]);
+             if (empty($comentario)) {
+                 sendError('Comentario no encontrado', 404);
+             }
+
+             $comentario = $comentario[0];
+             if ($comentario['idUsuario'] !== $currentUser['idUsuario'] && $currentUser['rol'] !== 'admin') {
+                 sendError('No autorizado para editar este comentario', 403);
+             }
             
             $result = executeSP('sp_actualizar_comentario', [$id, $input['contenido']]);
             
@@ -629,11 +709,170 @@ function handleComentarios($method, $request, $input) {
             
             $id = (int)$request[1];
             
+            $comentario = callStoredProcedure('sp_obtener_comentario_por_id', [$id]);
+            if (empty($comentario)) {
+                sendError('Comentario no encontrado', 404);
+            }
+            $comentario = $comentario[0];
+            
+            if ($comentario['idUsuario'] !== $currentUser['idUsuario'] && $currentUser['rol'] !== 'admin') {
+                sendError('No autorizado para eliminar este comentario', 403);
+            }
+            
             $result = executeSP('sp_eliminar_comentario', [$id]);
             
             sendResponse(null, 200, 'Comentario eliminado correctamente');
             break;
             
+        default:
+            sendError('Método no permitido', 405);
+    }
+}
+
+function handleComentarioReportesUsuario($method, $request, $input) {
+    if ($method !== 'POST') {
+        sendError('Método no permitido', 405);
+    }
+
+    $currentUser = requireAuth();
+
+    if (!isset($request[1])) {
+        sendError('ID de comentario requerido', 400);
+    }
+
+    $idComentario = (int)$request[1];
+
+    if (!$input || empty($input['motivo'])) {
+        sendError('Motivo del reporte requerido', 400);
+    }
+
+    $motivo = $input['motivo'];
+    $descripcion = $input['descripcion'] ?? null;
+    $motivosValidos = ['spam', 'lenguaje_ofensivo', 'acoso', 'contenido_inapropiado', 'otro'];
+
+    if (!in_array($motivo, $motivosValidos, true)) {
+        sendError('Motivo inválido', 400);
+    }
+
+    $idReporte = executeSP('sp_reportar_comentario', [
+        $idComentario,
+        $currentUser['idUsuario'],
+        $motivo,
+        $descripcion
+    ]);
+
+    if ($idReporte === false) {
+        sendError('No se pudo registrar el reporte', 500);
+    }
+
+    sendResponse(['idReporte' => $idReporte], 201, 'Reporte registrado correctamente');
+}
+
+function handleReportesComentarios($method, $request, $input) {
+    $currentUser = requireAuth();
+    requireAdmin($currentUser);
+
+    switch ($method) {
+        case 'GET':
+            $estado = $_GET['estado'] ?? null;
+            $reportes = callStoredProcedure('sp_obtener_reportes_comentarios', [$estado]);
+            $stats = callStoredProcedure('sp_obtener_estadisticas_comentarios_admin', []);
+
+            $grouped = [];
+            foreach ($reportes as $reporte) {
+                $idComentario = $reporte['idComentario'];
+                if (!isset($grouped[$idComentario])) {
+                    $grouped[$idComentario] = [
+                        'idComentario' => $idComentario,
+                        'contenidoComentario' => $reporte['contenidoComentario'],
+                        'fechaComentario' => $reporte['fechaComentario'],
+                        'comentarioActivo' => (int)$reporte['comentarioActivo'],
+                        'idPublicacion' => $reporte['idPublicacion'],
+                        'tituloPublicacion' => $reporte['tituloPublicacion'],
+                        'autorComentario' => [
+                            'idUsuario' => $reporte['idAutorComentario'],
+                            'nombre' => $reporte['nombreAutorComentario'],
+                            'foto' => $reporte['fotoAutorComentario'],
+                            'tieneBlob' => (int)$reporte['autorComentarioTieneBlob']
+                        ],
+                        'reportes' => [],
+                        'totalReportes' => 0,
+                        'pendientes' => 0
+                    ];
+                }
+
+                $grouped[$idComentario]['reportes'][] = [
+                    'idReporte' => $reporte['idReporte'],
+                    'motivo' => $reporte['motivo'],
+                    'descripcion' => $reporte['descripcion'],
+                    'fechaReporte' => $reporte['fechaReporte'],
+                    'estado' => $reporte['estado'],
+                    'reportador' => [
+                        'idUsuario' => $reporte['idUsuarioReportador'],
+                        'nombre' => $reporte['nombreReportador'],
+                        'foto' => $reporte['fotoReportador'],
+                        'tieneBlob' => (int)$reporte['reportadorTieneBlob']
+                    ]
+                ];
+
+                $grouped[$idComentario]['totalReportes']++;
+                if ($reporte['estado'] === 'pendiente') {
+                    $grouped[$idComentario]['pendientes']++;
+                }
+            }
+
+            $statsData = $stats[0] ?? [
+                'totalComentarios' => 0,
+                'totalEliminados' => 0,
+                'totalReportados' => 0,
+                'reportesPendientes' => 0
+            ];
+
+            sendResponse([
+                'stats' => $statsData,
+                'comentarios' => array_values($grouped)
+            ], 200, 'Reportes obtenidos correctamente');
+            break;
+
+        case 'PUT':
+            if (!isset($request[1])) {
+                sendError('ID de reporte requerido', 400);
+            }
+
+            if (!$input || empty($input['estado'])) {
+                sendError('Estado requerido', 400);
+            }
+
+            $idReporte = (int)$request[1];
+            $estado = $input['estado'];
+            $validEstados = ['pendiente', 'revisado', 'accion_tomada'];
+
+            if (!in_array($estado, $validEstados, true)) {
+                sendError('Estado inválido', 400);
+            }
+
+            $result = executeSP('sp_actualizar_estado_reporte_comentario', [$idReporte, $estado]);
+            if ($result === false) {
+                sendError('No se pudo actualizar el reporte', 500);
+            }
+
+            $accionComentario = $input['accionComentario'] ?? null;
+            if ($accionComentario) {
+                $reporteInfo = callStoredProcedure('sp_obtener_reporte_comentario_por_id', [$idReporte]);
+                $comentarioId = $reporteInfo[0]['idComentario'] ?? null;
+
+                if ($comentarioId) {
+                    if ($accionComentario === 'eliminar') {
+                        executeSP('sp_eliminar_comentario', [$comentarioId]);
+                    } elseif ($accionComentario === 'reactivar') {
+                        executeSP('sp_reactivar_comentario', [$comentarioId]);
+                    }
+                }
+            }
+
+            sendResponse(null, 200, 'Reporte actualizado correctamente');
+            break;
+
         default:
             sendError('Método no permitido', 405);
     }
@@ -824,6 +1063,40 @@ function handleMundiales($method, $request, $input) {
         default:
             sendError('Método no permitido', 405);
     }
+}
+
+// ============================================
+// HANDLERS - INTEGRACIONES EXTERNAS
+// ============================================
+
+function handleExternal($method, $request, $input) {
+    if ($method !== 'GET') {
+        sendError('Método no permitido', 405);
+    }
+
+    $resource = $request[1] ?? '';
+
+    if ($resource === 'fifa') {
+        $action = $request[2] ?? '';
+
+        if ($action === 'noticias') {
+            $year = isset($_GET['year']) ? (int)$_GET['year'] : null;
+            $limit = isset($_GET['limit']) ? (int)$_GET['limit'] : 3;
+
+            $service = new FifaArchiveService(__DIR__ . '/assets/cache');
+
+            try {
+                $data = $service->getNews($year > 0 ? $year : null, $limit > 0 ? $limit : 3);
+                sendResponse($data, 200, 'Noticias oficiales FIFA');
+            } catch (RuntimeException $exception) {
+                sendError($exception->getMessage(), 502);
+            } catch (Throwable $exception) {
+                sendError('No se pudieron obtener las noticias oficiales en este momento.', 502);
+            }
+        }
+    }
+
+    sendError('Recurso externo no encontrado', 404);
 }
 
 // ============================================

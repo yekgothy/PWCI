@@ -3,7 +3,7 @@
  * Funciones helper para subir y obtener imágenes del sistema BLOB
  */
 
-const IMAGEN_API_URL = 'http://localhost/PWCI/PWCI-Backend/imagen-api.php';
+const BLOB_API_URL = 'http://localhost/PWCI/PWCI-Backend/blob-api.php';
 
 /**
  * Subir foto de perfil de usuario
@@ -13,15 +13,13 @@ const IMAGEN_API_URL = 'http://localhost/PWCI/PWCI-Backend/imagen-api.php';
  */
 async function uploadUserPhoto(userId, file) {
     try {
-        const authToken = localStorage.getItem('authToken');
         const formData = new FormData();
-        formData.append('foto', file);
+        formData.append('imagen', file);
+        formData.append('tipo', 'perfil');
+        formData.append('id', userId);
 
-        const response = await fetch(`${IMAGEN_API_URL}/usuario/${userId}/foto`, {
+        const response = await fetch(`${BLOB_API_URL}?action=upload`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${authToken}`
-            },
             body: formData
         });
 
@@ -44,15 +42,13 @@ async function uploadUserPhoto(userId, file) {
  */
 async function uploadPublicacionMedia(publicacionId, file) {
     try {
-        const authToken = localStorage.getItem('authToken');
         const formData = new FormData();
-        formData.append('multimedia', file);
+        formData.append('imagen', file);
+        formData.append('tipo', 'publicacion');
+        formData.append('id', publicacionId);
 
-        const response = await fetch(`${IMAGEN_API_URL}/publicacion/${publicacionId}/multimedia`, {
+        const response = await fetch(`${BLOB_API_URL}?action=upload`, {
             method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${authToken}`
-            },
             body: formData
         });
 
@@ -72,8 +68,13 @@ async function uploadPublicacionMedia(publicacionId, file) {
  * @param {number} userId - ID del usuario
  * @returns {string} URL de la imagen
  */
-function getUserPhotoUrl(userId) {
-    return `${IMAGEN_API_URL}/usuario/${userId}/foto`;
+function getUserPhotoUrl(userId, options = {}) {
+    if (userId === undefined || userId === null) return null;
+    let url = `${BLOB_API_URL}?action=download&tipo=perfil&id=${userId}`;
+    if (options.cacheBust) {
+        url += `&_=${Date.now()}`;
+    }
+    return url;
 }
 
 /**
@@ -81,8 +82,13 @@ function getUserPhotoUrl(userId) {
  * @param {number} publicacionId - ID de la publicación
  * @returns {string} URL de la imagen
  */
-function getPublicacionMediaUrl(publicacionId) {
-    return `${IMAGEN_API_URL}/publicacion/${publicacionId}/multimedia`;
+function getPublicacionMediaUrl(publicacionId, options = {}) {
+    if (publicacionId === undefined || publicacionId === null) return null;
+    let url = `${BLOB_API_URL}?action=download&tipo=publicacion&id=${publicacionId}`;
+    if (options.cacheBust) {
+        url += `&_=${Date.now()}`;
+    }
+    return url;
 }
 
 /**

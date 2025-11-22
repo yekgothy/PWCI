@@ -2,19 +2,12 @@
 // CONTROLADOR DEL FEED - WORLD CUP HUB
 // ============================================
 
-const API_BASE_URL = 'http://localhost/PWCI/PWCI-Backend/api.php';
-
 // Estado global
 let currentUser = null;
 let allPosts = [];
 let filteredPosts = [];
 let categories = [];
 let worldCups = [];
-
-// ============================================
-// INICIALIZACIÓN
-// ============================================
-let isInitialized = false;
 
 document.addEventListener('DOMContentLoaded', async function() {
     console.log('Inicializando feed...');
@@ -36,7 +29,6 @@ document.addEventListener('DOMContentLoaded', async function() {
     setupEventListeners();
     setupFilterListeners();
     
-    isInitialized = true;
     console.log('Feed inicializado correctamente');
 });
 
@@ -84,30 +76,13 @@ function checkAuth() {
     }
 }
 
-function getAuthToken() {
-    return localStorage.getItem('authToken');
-}
-
 // ============================================
 // CARGAR PUBLICACIONES
 // ============================================
-async function loadPosts(shouldRender = true) {
+async function loadPosts() {
     try {
-        // Construir URL básica - los filtros se aplican después con applyFilters()
-        let url = `${API_BASE_URL}/publicaciones?estado=aprobada`;
-        
-        console.log('Cargando posts desde:', url);
-        
-        const token = getAuthToken();
-        const headers = {};
-        
-        if (token) {
-            headers['Authorization'] = `Bearer ${token}`;
-            console.log('🔐 Token enviado en request');
-        }
-        
-        const response = await fetch(url, { headers });
-        const data = await response.json();
+        console.log('Cargando posts desde API (middleware)...');
+        const data = await api.get('/publicaciones?estado=aprobada');
         
         console.log('📦 Respuesta completa de la API:', data);
         
@@ -131,16 +106,15 @@ async function loadPosts(shouldRender = true) {
             console.log('Ejemplo:', postsConInteraccion[0]);
         }
         
-        // Solo renderizar si se solicita (primera carga)
-        if (shouldRender) {
-            // Inicializar filteredPosts con todos los posts
-            filteredPosts = [...allPosts];
-            renderPosts(filteredPosts);
-            updateResultsCount();
-        }
+        applyFilters();
     } catch (error) {
-        console.error('Error cargando posts:', error);
-        showError('Error de conexión con el servidor');
+        if (error instanceof APIError) {
+            console.error('APIError cargando posts:', error);
+            showError(error.message || 'No se pudieron cargar las publicaciones');
+        } else {
+            console.error('Error cargando posts:', error);
+            showError('Error de conexión con el servidor');
+        }
     }
 }
 
@@ -149,15 +123,18 @@ async function loadPosts(shouldRender = true) {
 // ============================================
 async function loadCategories() {
     try {
-        const response = await fetch(`${API_BASE_URL}/categorias`);
-        const data = await response.json();
+        const data = await api.get('/categorias');
         
         categories = data.data || data || [];
         console.log(`✅ ${categories.length} categorías cargadas`);
         
         populateCategoryFilter();
     } catch (error) {
-        console.error('Error cargando categorías:', error);
+        if (error instanceof APIError) {
+            console.error('APIError cargando categorías:', error);
+        } else {
+            console.error('Error cargando categorías:', error);
+        }
     }
 }
 
@@ -178,15 +155,18 @@ function populateCategoryFilter() {
 // ============================================
 async function loadWorldCups() {
     try {
-        const response = await fetch(`${API_BASE_URL}/mundiales`);
-        const data = await response.json();
+        const data = await api.get('/mundiales');
         
         worldCups = data.data || data || [];
         console.log(`✅ ${worldCups.length} mundiales cargados`);
         
         populateWorldCupFilter();
     } catch (error) {
-        console.error('Error cargando mundiales:', error);
+        if (error instanceof APIError) {
+            console.error('APIError cargando mundiales:', error);
+        } else {
+            console.error('Error cargando mundiales:', error);
+        }
     }
 }
 
@@ -269,12 +249,13 @@ function setupFilterListeners() {
 }
 
 function applyFilters() {
-    if (!isInitialized || !allPosts || allPosts.length === 0) {
-        console.log('⏸️ Saltando filtros - no inicializado o sin posts');
+    if (!allPosts || allPosts.length === 0) {
+        console.log('⏸️ Sin publicaciones cargadas; filtros no aplicados');
         return;
     }
     
-    const searchText = document.getElementById('searchInput')?.value.toLowerCase() || '';
+    const rawSearch = document.getElementById('searchInput')?.value || '';
+    const searchText = rawSearch.trim().toLowerCase();
     const categoryId = document.getElementById('categoryFilter')?.value || '';
     const worldCupId = document.getElementById('worldCupFilter')?.value || '';
     const sortBy = document.getElementById('sortFilter')?.value || 'recientes';
@@ -283,10 +264,7 @@ function applyFilters() {
     
     // Filtrar posts
     filteredPosts = allPosts.filter(post => {
-        // Filtro de búsqueda
-        const matchesSearch = !searchText || 
-            (post.titulo && post.titulo.toLowerCase().includes(searchText)) ||
-            (post.contenido && post.contenido.toLowerCase().includes(searchText));
+        const matchesSearch = !searchText || matchesSearchText(post, searchText);
         
         // Filtro de categoría
         const matchesCategory = !categoryId || 
@@ -302,14 +280,33 @@ function applyFilters() {
     console.log('✅ Filtrados:', filteredPosts.length, 'de', allPosts.length);
     
     // Ordenar posts
-    sortPosts(filteredPosts, sortBy);
+    sortFeedPosts(filteredPosts, sortBy);
     
     // Renderizar
     renderPosts(filteredPosts);
     updateResultsCount();
 }
 
-function sortPosts(posts, sortBy) {
+function matchesSearchText(post, searchText) {
+    const fieldsToCheck = [
+        post.titulo,
+        post.contenido,
+        post.nombreAutor,
+        post.nombreCategoria,
+        post.nombreMundial,
+        post.paisMundial,
+        post.anioMundial ? String(post.anioMundial) : null
+    ];
+
+    return fieldsToCheck.some(field => {
+        if (field === undefined || field === null) {
+            return false;
+        }
+        return String(field).toLowerCase().includes(searchText);
+    });
+}
+
+function sortFeedPosts(posts, sortBy) {
     switch(sortBy) {
         case 'recientes':
             posts.sort((a, b) => new Date(b.fechaPublicacion) - new Date(a.fechaPublicacion));
@@ -411,16 +408,27 @@ function createPostHTML(post) {
     const userInitial = post.nombreAutor ? post.nombreAutor.charAt(0).toUpperCase() : 'U';
     const userName = post.nombreAutor || 'Usuario';
     const postDate = formatDate(post.fechaPublicacion);
-    const categoryBadge = post.nombreCategoria ? `<span class="px-3 py-1 bg-zinc-200 text-zinc-700 text-xs font-semibold rounded-full">${post.nombreCategoria}</span>` : '';
+    const categoryBadge = post.nombreCategoria ? `<span class="px-2.5 py-0.5 bg-zinc-200 text-zinc-700 text-xs font-semibold rounded-full">${post.nombreCategoria}</span>` : '';
+    const avatarUtils = window.PWCI && window.PWCI.avatar ? window.PWCI.avatar : null;
+    const avatarUrl = avatarUtils ? avatarUtils.getAvatarUrl({
+        id: post.idUsuario,
+        foto: post.fotoAutor,
+        hasBlob: post.autorTieneFotoBlob
+    }) : null;
     
     return `
-        <article class="bg-white/95 backdrop-blur-sm rounded-xl shadow-lg hover:shadow-xl transition-shadow duration-300 mb-6 overflow-hidden border border-zinc-200" data-post-id="${post.idPublicacion}">
+        <article class="bg-white/95 backdrop-blur-sm rounded-lg shadow-md hover:shadow-lg transition-shadow duration-300 mb-5 overflow-hidden border border-zinc-200" data-post-id="${post.idPublicacion}">
             <!-- Header del post -->
-            <div class="p-6 pb-4">
-                <div class="flex items-center justify-between mb-4">
+            <div class="p-5 pb-3">
+                <div class="flex items-center justify-between mb-3">
                     <div class="flex items-center">
-                        <div class="w-12 h-12 bg-gradient-to-br from-zinc-700 to-zinc-900 rounded-full flex items-center justify-center shadow-md">
-                            <span class="text-white font-bold text-lg">${userInitial}</span>
+                        <div class="relative w-10 h-10 flex items-center justify-center">
+                            <img src="${avatarUrl || ''}" alt="Foto de ${userName}"
+                                 class="${avatarUrl ? '' : 'hidden '}w-10 h-10 rounded-full object-cover border border-zinc-200 shadow-md"
+                                 onerror="this.classList.add('hidden'); this.nextElementSibling.classList.remove('hidden');">
+                            <div class="${avatarUrl ? 'hidden ' : ''}w-10 h-10 bg-gradient-to-br from-zinc-700 to-zinc-900 rounded-full flex items-center justify-center shadow-md">
+                                <span class="text-white font-bold text-base">${userInitial}</span>
+                            </div>
                         </div>
                         <div class="ml-3">
                             <p class="font-semibold text-zinc-900">${userName}</p>
@@ -431,10 +439,10 @@ function createPostHTML(post) {
                 </div>
                 
                 <!-- Título y contenido -->
-                <h2 class="text-2xl font-bold text-zinc-900 mb-3 hover:text-zinc-700 cursor-pointer" onclick="goToPostDetail(${post.idPublicacion})">
+                <h2 class="text-xl font-bold text-zinc-900 mb-2 hover:text-zinc-700 cursor-pointer" onclick="goToPostDetail(${post.idPublicacion})">
                     ${post.titulo}
                 </h2>
-                <p class="text-zinc-700 mb-4 whitespace-pre-line leading-relaxed">${post.contenido}</p>
+                <p class="text-zinc-700 mb-3 whitespace-pre-line leading-normal">${post.contenido}</p>
             </div>
             
             <!-- Imagen (si existe) -->
@@ -442,9 +450,9 @@ function createPostHTML(post) {
             
             
             <!-- Interacciones -->
-            <div class="px-6 pb-6">
-                <div class="flex items-center justify-between pt-4 border-t border-zinc-200">
-                    <div class="flex items-center space-x-6">
+            <div class="px-5 pb-5">
+                <div class="flex items-center justify-between pt-3 border-t border-zinc-200">
+                    <div class="flex items-center space-x-5">
                         <!-- Like -->
                         <button class="like-btn flex items-center space-x-2 px-3 py-2 rounded-lg transition-all duration-200 ${post.userInteraction === 'like' ? 'text-green-600 bg-green-50' : 'text-zinc-600 hover:text-green-600 hover:bg-green-50'} group" 
                                 data-post-id="${post.idPublicacion}"
@@ -518,121 +526,216 @@ function setupEventListeners() {
     });
 }
 
+function findPostById(postId) {
+    return allPosts.find(post => String(post.idPublicacion) === String(postId));
+}
+
+function normalizeCountValue(value) {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed >= 0 ? parsed : 0;
+}
+
+function getPostLikeCount(post) {
+    if (post.likes !== undefined && post.likes !== null) {
+        return normalizeCountValue(post.likes);
+    }
+    if (post.totalLikes !== undefined && post.totalLikes !== null) {
+        return normalizeCountValue(post.totalLikes);
+    }
+    if (post.reaccionesPositivas !== undefined && post.reaccionesPositivas !== null) {
+        return normalizeCountValue(post.reaccionesPositivas);
+    }
+    return 0;
+}
+
+function setPostLikeCount(post, value) {
+    const normalized = normalizeCountValue(value);
+    post.likes = normalized;
+    if ('totalLikes' in post) {
+        post.totalLikes = normalized;
+    }
+    if ('reaccionesPositivas' in post) {
+        post.reaccionesPositivas = normalized;
+    }
+}
+
+function getPostDislikeCount(post) {
+    if (post.dislikes !== undefined && post.dislikes !== null) {
+        return normalizeCountValue(post.dislikes);
+    }
+    if (post.totalDislikes !== undefined && post.totalDislikes !== null) {
+        return normalizeCountValue(post.totalDislikes);
+    }
+    if (post.reaccionesNegativas !== undefined && post.reaccionesNegativas !== null) {
+        return normalizeCountValue(post.reaccionesNegativas);
+    }
+    return 0;
+}
+
+function setPostDislikeCount(post, value) {
+    const normalized = normalizeCountValue(value);
+    post.dislikes = normalized;
+    if ('totalDislikes' in post) {
+        post.totalDislikes = normalized;
+    }
+    if ('reaccionesNegativas' in post) {
+        post.reaccionesNegativas = normalized;
+    }
+}
+
+function applyInteractionTransition(post, nextState) {
+    const previousState = post.userInteraction || null;
+    let likes = getPostLikeCount(post);
+    let dislikes = getPostDislikeCount(post);
+
+    if (previousState === 'like') {
+        likes = Math.max(0, likes - 1);
+    } else if (previousState === 'dislike') {
+        dislikes = Math.max(0, dislikes - 1);
+    }
+
+    if (nextState === 'like') {
+        likes += 1;
+    } else if (nextState === 'dislike') {
+        dislikes += 1;
+    }
+
+    setPostLikeCount(post, likes);
+    setPostDislikeCount(post, dislikes);
+    post.userInteraction = nextState;
+
+    if ('totalReacciones' in post) {
+        post.totalReacciones = normalizeCountValue(likes + dislikes);
+    }
+
+    return { previous: previousState, next: nextState };
+}
+
+function updatePostInteractionUI(post) {
+    const card = document.querySelector(`[data-post-id="${post.idPublicacion}"]`);
+    if (!card) {
+        return;
+    }
+
+    const likeBtn = card.querySelector('.like-btn');
+    if (likeBtn) {
+        const likeClassesActive = ['text-green-600', 'bg-green-50'];
+        const likeClassesInactive = ['text-zinc-600', 'hover:text-green-600', 'hover:bg-green-50'];
+
+        [...likeClassesActive, ...likeClassesInactive].forEach(cls => likeBtn.classList.remove(cls));
+
+        if (post.userInteraction === 'like') {
+            likeClassesActive.forEach(cls => likeBtn.classList.add(cls));
+        } else {
+            likeClassesInactive.forEach(cls => likeBtn.classList.add(cls));
+        }
+
+        const likeCounter = likeBtn.querySelector('span.font-semibold');
+        if (likeCounter) {
+            likeCounter.textContent = getPostLikeCount(post);
+        }
+    }
+
+    const dislikeBtn = card.querySelector('.dislike-btn');
+    if (dislikeBtn) {
+        const dislikeClassesActive = ['text-red-600', 'bg-red-50'];
+        const dislikeClassesInactive = ['text-zinc-600', 'hover:text-red-600', 'hover:bg-red-50'];
+
+        [...dislikeClassesActive, ...dislikeClassesInactive].forEach(cls => dislikeBtn.classList.remove(cls));
+
+        if (post.userInteraction === 'dislike') {
+            dislikeClassesActive.forEach(cls => dislikeBtn.classList.add(cls));
+        } else {
+            dislikeClassesInactive.forEach(cls => dislikeBtn.classList.add(cls));
+        }
+
+        const dislikeCounter = dislikeBtn.querySelector('span.font-semibold');
+        if (dislikeCounter) {
+            dislikeCounter.textContent = getPostDislikeCount(post);
+        }
+    }
+}
+
+function shouldResortByLikes() {
+    const sortFilter = document.getElementById('sortFilter');
+    return sortFilter && sortFilter.value === 'likes';
+}
+
 async function handleLike(postId) {
-    const token = getAuthToken();
-    
-    if (!token) {
+    if (!api.hasToken()) {
         alert('Debes iniciar sesión para dar like');
         return;
     }
-    
-    // Encontrar el post actual para verificar si ya tiene like
-    const post = allPosts.find(p => p.idPublicacion == postId);
-    
-    // Si ya tiene like, quitarlo
-    if (post && post.userInteraction === 'like') {
-        try {
-            const response = await fetch(`${API_BASE_URL}/publicaciones/${postId}/interaccion`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            const data = await response.json();
-            
-            if (data.status === 200) {
-                console.log('✅ Like removido');
-                await loadPosts(false);
-                applyFilters(); // Reaplicar filtros después de recargar
-            }
-        } catch (error) {
-            console.error('Error al quitar like:', error);
-        }
+
+    const post = findPostById(postId);
+    if (!post) {
+        console.warn('Publicación no encontrada para like:', postId);
         return;
     }
-    
-    // Dar like (nuevo o cambiar desde dislike)
+
     try {
-        const response = await fetch(`${API_BASE_URL}/publicaciones/${postId}/like`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+        if (post.userInteraction === 'like') {
+            await api.delete(`/publicaciones/${postId}/interaccion`);
+            applyInteractionTransition(post, null);
+            updatePostInteractionUI(post);
+            if (shouldResortByLikes()) {
+                applyFilters();
             }
-        });
-        
-        const data = await response.json();
-        
-        if (data.status === 200 || data.status === 409) {
-            console.log('✅ Like registrado');
-            await loadPosts(false);
-            applyFilters(); // Reaplicar filtros después de recargar
-        } else {
-            console.error('Error:', data.message);
+            return;
+        }
+
+        const data = await api.post(`/publicaciones/${postId}/like`);
+        if (!data || (data.status !== 200 && data.status !== 409)) {
+            throw new APIError('No se pudo registrar el like.', data ? data.status : 500, data);
+        }
+
+        applyInteractionTransition(post, 'like');
+        updatePostInteractionUI(post);
+        if (shouldResortByLikes()) {
+            applyFilters();
         }
     } catch (error) {
-        console.error('Error al dar like:', error);
+        console.error('Error al procesar like:', error);
+        showError('No se pudo procesar tu like. Intenta más tarde.');
     }
 }
 
 async function handleDislike(postId) {
-    const token = getAuthToken();
-    
-    if (!token) {
+    if (!api.hasToken()) {
         alert('Debes iniciar sesión para dar dislike');
         return;
     }
-    
-    // Encontrar el post actual para verificar si ya tiene dislike
-    const post = allPosts.find(p => p.idPublicacion == postId);
-    
-    // Si ya tiene dislike, quitarlo
-    if (post && post.userInteraction === 'dislike') {
-        try {
-            const response = await fetch(`${API_BASE_URL}/publicaciones/${postId}/interaccion`, {
-                method: 'DELETE',
-                headers: {
-                    'Authorization': `Bearer ${token}`,
-                    'Content-Type': 'application/json'
-                }
-            });
-            
-            const data = await response.json();
-            
-            if (data.status === 200) {
-                console.log('✅ Dislike removido');
-                await loadPosts(false);
-                applyFilters(); // Reaplicar filtros después de recargar
-            }
-        } catch (error) {
-            console.error('Error al quitar dislike:', error);
-        }
+
+    const post = findPostById(postId);
+    if (!post) {
+        console.warn('Publicación no encontrada para dislike:', postId);
         return;
     }
-    
-    // Dar dislike (nuevo o cambiar desde like)
+
     try {
-        const response = await fetch(`${API_BASE_URL}/publicaciones/${postId}/dislike`, {
-            method: 'POST',
-            headers: {
-                'Authorization': `Bearer ${token}`,
-                'Content-Type': 'application/json'
+        if (post.userInteraction === 'dislike') {
+            await api.delete(`/publicaciones/${postId}/interaccion`);
+            applyInteractionTransition(post, null);
+            updatePostInteractionUI(post);
+            if (shouldResortByLikes()) {
+                applyFilters();
             }
-        });
-        
-        const data = await response.json();
-        
-        if (data.status === 200 || data.status === 409) {
-            console.log('✅ Dislike registrado');
-            await loadPosts(false);
-            applyFilters(); // Reaplicar filtros después de recargar
-        } else {
-            console.error('Error:', data.message);
+            return;
+        }
+
+        const data = await api.post(`/publicaciones/${postId}/dislike`);
+        if (!data || (data.status !== 200 && data.status !== 409)) {
+            throw new APIError('No se pudo registrar el dislike.', data ? data.status : 500, data);
+        }
+
+        applyInteractionTransition(post, 'dislike');
+        updatePostInteractionUI(post);
+        if (shouldResortByLikes()) {
+            applyFilters();
         }
     } catch (error) {
-        console.error('Error al dar dislike:', error);
+        console.error('Error al procesar dislike:', error);
+        showError('No se pudo procesar tu dislike. Intenta más tarde.');
     }
 }
 
@@ -686,13 +789,20 @@ function showError(message) {
 // ============================================
 // FILTROS (OPCIONAL - PARA FUTURO)
 // ============================================
-function filterByCategory(categoryId) {
-    loadPosts({ categoria: categoryId });
+function filterFeedByCategory(categoryId) {
+    const categoryFilter = document.getElementById('categoryFilter');
+    if (categoryFilter) {
+        categoryFilter.value = categoryId || '';
+    }
+    applyFilters();
 }
 
-function sortPosts(order) {
-    // order puede ser: 'recientes', 'antiguos', 'populares'
-    loadPosts({ ordenar: order });
+function setFeedSorting(order) {
+    const sortFilter = document.getElementById('sortFilter');
+    if (sortFilter) {
+        sortFilter.value = order || 'recientes';
+    }
+    applyFilters();
 }
 
 // ============================================
@@ -703,10 +813,10 @@ function getImageHTML(post) {
     if (post.tieneBlob && post.tieneBlob == 1) {
         const imageUrl = `http://localhost/PWCI/PWCI-Backend/blob-api.php?action=download&tipo=publicacion&id=${post.idPublicacion}`;
         return `
-            <div class="px-6 pb-4">
+            <div class="px-5 pb-3">
                 <img src="${imageUrl}" 
                      alt="${post.titulo}" 
-                     class="w-full rounded-lg object-cover max-h-96 cursor-pointer hover:opacity-95 transition-opacity"
+                     class="w-full rounded-lg object-cover max-h-80 cursor-pointer hover:opacity-95 transition-opacity"
                      onclick="goToPostDetail(${post.idPublicacion})"
                      onerror="console.error('Error cargando imagen BLOB'); this.style.display='none'">
             </div>
@@ -715,10 +825,10 @@ function getImageHTML(post) {
     // Si tiene URL, usar URL
     else if (post.urlMultimedia) {
         return `
-            <div class="px-6 pb-4">
+            <div class="px-5 pb-3">
                 <img src="${post.urlMultimedia}" 
                      alt="${post.titulo}" 
-                     class="w-full rounded-lg object-cover max-h-96 cursor-pointer hover:opacity-95 transition-opacity"
+                     class="w-full rounded-lg object-cover max-h-80 cursor-pointer hover:opacity-95 transition-opacity"
                      onclick="goToPostDetail(${post.idPublicacion})"
                      onerror="this.style.display='none'">
             </div>
@@ -732,5 +842,7 @@ function getImageHTML(post) {
 // EXPONER FUNCIONES GLOBALES PARA HTML
 // ============================================
 window.clearFilters = clearFilters;
+window.filterFeedByCategory = filterFeedByCategory;
+window.setFeedSorting = setFeedSorting;
 
 console.log('✅ Feed controller cargado');

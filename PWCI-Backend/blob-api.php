@@ -91,16 +91,19 @@ try {
             ]);
         }
         
-        if ($result && $result[0]['filasAfectadas'] > 0) {
-            sendResponse(200, 'Imagen subida correctamente', [
-                'tipo' => $tipo,
-                'id' => $id,
-                'nombre' => $imageName,
-                'tamano' => $file['size']
-            ]);
-        } else {
-            sendError('Error al guardar la imagen en la base de datos', 500);
+        $filasAfectadas = null;
+        if (is_array($result) && isset($result[0]['filasAfectadas'])) {
+            $filasAfectadas = (int)$result[0]['filasAfectadas'];
         }
+
+        sendResponse(200, 'Imagen subida correctamente', [
+            'tipo' => $tipo,
+            'id' => $id,
+            'nombre' => $imageName,
+            'tamano' => $file['size'],
+            'tieneFotoBlob' => $tipo === 'perfil' ? 1 : null,
+            'filasAfectadas' => $filasAfectadas
+        ]);
     }
     
     // ============================================

@@ -100,6 +100,9 @@ $usuario->nombreCompleto = "Juan Pérez";
 $usuario->correoElectronico = "juan@example.com";
 $usuario->contrasena = password_hash("123456", PASSWORD_DEFAULT);
 $usuario->fechaNacimiento = "2000-01-01";
+$usuario->genero = "Masculino";
+$usuario->paisNacimiento = "Mexico";
+$usuario->nacionalidad = "Mexicana";
 
 $idUsuario = $usuario->registrar(); // Llama a sp_registrar_usuario
 ```

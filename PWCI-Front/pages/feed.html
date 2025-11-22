@@ -15,20 +15,19 @@
     <div class="min-h-screen pt-16 md:pt-0 flex">
         <!-- SIDEBAR IZQUIERDO (fijo) -->
         <aside class="hidden md:block w-64 fixed left-0 top-0 bottom-0 border-r border-zinc-800">
-            <div id="sidebar-left-container" class="h-screen overflow-y-auto flex flex-col">
-            </div>
+            <div id="sidebar-left-container" class="h-screen overflow-y-auto flex flex-col"></div>
         </aside>
 
         <!-- CONTENIDO PRINCIPAL -->
-        <main class="flex-1 w-full md:ml-64 lg:mr-80 px-4 md:px-8 lg:px-12 py-8" id="feed-main">
+        <main class="flex-1 w-full md:ml-64 lg:mr-80 px-4 md:px-6 lg:px-10 py-6" id="feed-main">
             <!-- Barra de búsqueda y filtros -->
-            <div class="mb-8 bg-white/95 backdrop-blur-sm rounded-xl shadow-lg border border-zinc-200 p-6">
+            <div class="mb-6 bg-white/95 backdrop-blur-sm rounded-lg shadow-md border border-zinc-200 p-5">
                 <!-- Título -->
                 <div class="flex items-center gap-3 mb-6">
                     <svg class="w-6 h-6 text-zinc-700" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z"></path>
                     </svg>
-                    <h2 class="text-xl font-bold text-zinc-800">Buscar y Filtrar Publicaciones</h2>
+                    <h2 class="text-lg font-bold text-zinc-800">Buscar y Filtrar Publicaciones</h2>
                 </div>
 
                 <!-- Buscador -->
@@ -38,7 +37,7 @@
                             type="text" 
                             id="searchInput" 
                             placeholder="Buscar por título o contenido..." 
-                            class="w-full px-4 py-3 pl-12 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
+                            class="w-full px-4 py-2.5 pl-12 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all"
                         >
                         <svg class="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-zinc-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                             <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
@@ -47,11 +46,11 @@
                 </div>
 
                 <!-- Filtros en fila -->
-                <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <!-- Filtro por Categoría -->
                     <div>
                         <label class="block text-sm font-semibold text-zinc-700 mb-2">Categoría</label>
-                        <select id="categoryFilter" class="w-full px-4 py-2.5 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all">
+                        <select id="categoryFilter" class="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all">
                             <option value="">Todas las categorías</option>
                         </select>
                     </div>
@@ -59,7 +58,7 @@
                     <!-- Filtro por Mundial -->
                     <div>
                         <label class="block text-sm font-semibold text-zinc-700 mb-2">Mundial</label>
-                        <select id="worldCupFilter" class="w-full px-4 py-2.5 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all">
+                        <select id="worldCupFilter" class="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all">
                             <option value="">Todos los mundiales</option>
                         </select>
                     </div>
@@ -67,7 +66,7 @@
                     <!-- Ordenar por -->
                     <div>
                         <label class="block text-sm font-semibold text-zinc-700 mb-2">Ordenar por</label>
-                        <select id="sortFilter" class="w-full px-4 py-2.5 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all">
+                        <select id="sortFilter" class="w-full px-4 py-2 border border-zinc-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-black focus:border-transparent transition-all">
                             <option value="recientes">Más recientes</option>
                             <option value="antiguos">Más antiguos</option>
                             <option value="likes">Más likes</option>
@@ -101,219 +100,77 @@
         </aside>
     </div>
 
-    <!-- JavaScript para cargar componentes -->
+    <script src="../controllers/api-client.js"></script>
+    <script src="../controllers/auth.js"></script>
+    <script>protectPage();</script>
+    <script src="../controllers/avatar-utils.js"></script>
+    <script src="../controllers/session.js"></script>
+    <script src="../controllers/countdown.js"></script>
     <script>
-        // Funci�n para inicializar el navbar
         function initializeNavbar() {
             const menuButton = document.getElementById('menuButton');
             const sidebarMenu = document.getElementById('sidebarMenu');
             const closeMenuButton = document.getElementById('closeMenuButton');
             const menuOverlay = document.getElementById('menuOverlay');
 
-            if (menuButton && sidebarMenu) {
-                // Abrir men� hamburguesa
-                menuButton.addEventListener('click', function() {
-                    sidebarMenu.classList.remove('hidden');
+            if (!menuButton || !sidebarMenu) {
+                return;
+            }
+
+            menuButton.addEventListener('click', () => {
+                sidebarMenu.classList.remove('hidden');
+            });
+
+            if (closeMenuButton) {
+                closeMenuButton.addEventListener('click', () => {
+                    sidebarMenu.classList.add('hidden');
                 });
+            }
 
-                // Cerrar men� con bot�n X
-                if (closeMenuButton) {
-                    closeMenuButton.addEventListener('click', function() {
-                        sidebarMenu.classList.add('hidden');
-                    });
-                }
-
-                // Cerrar men� haciendo clic en el overlay
-                if (menuOverlay) {
-                    menuOverlay.addEventListener('click', function() {
-                        sidebarMenu.classList.add('hidden');
-                    });
-                }
+            if (menuOverlay) {
+                menuOverlay.addEventListener('click', () => {
+                    sidebarMenu.classList.add('hidden');
+                });
             }
         }
 
-        // Inicializar countdown (mueve l�gica fuera del componente)
-        function initCountdown() {
-            const target = new Date("June 11, 2026 00:00:00").getTime();
-            function update() {
-                const now = Date.now();
-                const diff = target - now;
-                if (diff <= 0) {
-                    const el = document.getElementById('countdown');
-                    if (el) {
-                        el.innerHTML = "<p class='col-span-4 text-center text-lg font-bold'>�El Mundial ha comenzado!</p>";
-                    }
-                    return; // No reprogramar
-                }
-                const d = Math.floor(diff / 86400000);
-                const h = Math.floor((diff % 86400000) / 3600000);
-                const m = Math.floor((diff % 3600000) / 60000);
-                const s = Math.floor((diff % 60000) / 1000);
-                const daysEl = document.getElementById('days');
-                if (daysEl) {
-                    daysEl.textContent = d;
-                    document.getElementById('hours').textContent = h;
-                    document.getElementById('minutes').textContent = m;
-                    document.getElementById('seconds').textContent = s;
-                    setTimeout(update, 1000);
-                }
-            }
-            update();
-        }
-
-        // Cargar todos los componentes
         Promise.all([
-            // Cargar Navbar
-            fetch('../components/navbar.html?v=4')
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('navbar').innerHTML = data;
-                }),
-
-            // Cargar Sidebar Izquierdo
-            fetch('../components/sidebarFeed1.html?v=4')
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('sidebar-left-container').innerHTML = data;
-                }),
-
-            // NO cargar cardpostFeed.html - feed.js maneja el contenido principal
-
-            // Cargar Sidebar Derecho
-            fetch('../components/sidebarFeed2.html?v=3')
-                .then(response => response.text())
-                .then(data => {
-                    document.getElementById('sidebar-right-container').innerHTML = data;
-                    initCountdown();
-                })
+            fetch('../components/navbar.html?v=4').then(res => res.text()),
+            fetch('../components/sidebarFeed1.html?v=4').then(res => res.text()),
+            fetch('../components/sidebarFeed2.html?v=3').then(res => res.text())
         ])
-        .then(() => {
-            console.log('Todos los componentes cargados exitosamente');
-            
-            // Inicializar navbar y sidebar despu�s de que todo est� cargado
-            setTimeout(() => {
-                initializeNavbar();
-                initUserInterface();
-                
-                // Inicializar sidebar usando el controlador compartido
-                if (typeof initSidebar === 'function') {
-                    initSidebar();
-                }
-            }, 200);
+        .then(([navbarHTML, sidebarLeftHTML, sidebarRightHTML]) => {
+            const navbarContainer = document.getElementById('navbar');
+            const sidebarLeftContainer = document.getElementById('sidebar-left-container');
+            const sidebarRightContainer = document.getElementById('sidebar-right-container');
+
+            if (navbarContainer) {
+                navbarContainer.innerHTML = navbarHTML;
+            }
+            if (sidebarLeftContainer) {
+                sidebarLeftContainer.innerHTML = sidebarLeftHTML;
+            }
+            if (sidebarRightContainer) {
+                sidebarRightContainer.innerHTML = sidebarRightHTML;
+            }
+
+            initializeNavbar();
+            if (typeof initSidebar === 'function') {
+                initSidebar();
+            }
+            if (window.PWCI && window.PWCI.session) {
+                window.PWCI.session.refreshUI();
+            }
+            if (window.PWCI && window.PWCI.countdown) {
+                window.PWCI.countdown.init();
+            }
         })
         .catch(error => {
             console.error('Error cargando componentes:', error);
         });
-        
-        // Funci�n para inicializar la interfaz de usuario
-        function initUserInterface() {
-            // Obtener datos del usuario
-            const userData = getUserDataFromStorage();
-            const isAuth = userData !== null;
-            
-            console.log('Usuario autenticado:', isAuth);
-            if (userData) {
-                console.log('Datos del usuario:', userData);
-            }
-            
-            // Actualizar Navbar
-            updateNavbar(userData, isAuth);
-        }
-        
-        // Obtener datos del usuario
-        function getUserDataFromStorage() {
-            try {
-                const data = localStorage.getItem('userData');
-                return data ? JSON.parse(data) : null;
-            } catch (error) {
-                console.error('Error al obtener datos:', error);
-                return null;
-            }
-        }
-        
-        // Actualizar navbar con informaci�n del usuario
-        function updateNavbar(userData, isAuth) {
-            const authButtons = document.getElementById('authButtons');
-            const userMenu = document.getElementById('userMenu');
-            const navUserName = document.getElementById('navUserName');
-            const logoutButton = document.getElementById('logoutButton');
-            
-            if (isAuth && userData) {
-                // Ocultar botones de login/signup
-                if (authButtons) authButtons.classList.add('hidden');
-                
-                // Mostrar men� de usuario
-                if (userMenu) {
-                    userMenu.classList.remove('hidden');
-                    userMenu.classList.add('flex');
-                }
-                
-                // Actualizar nombre
-                if (navUserName) {
-                    navUserName.textContent = userData.nombreCompleto || 'Usuario';
-                }
-                
-                // Agregar evento de logout
-                if (logoutButton) {
-                    logoutButton.onclick = handleLogout;
-                }
-            } else {
-                // Mostrar botones de login/signup
-                if (authButtons) authButtons.classList.remove('hidden');
-                
-                // Ocultar men� de usuario
-                if (userMenu) userMenu.classList.add('hidden');
-            }
-        }
-        
-        // Actualizar sidebar con informaci�n del usuario
-        function updateSidebar(userData, isAuth) {
-            const sidebarUserName = document.getElementById('sidebarUserName');
-            const sidebarUserInitials = document.getElementById('sidebarUserInitials');
-            const sidebarLogoutButton = document.getElementById('sidebarLogoutButton');
-            
-            if (isAuth && userData) {
-                // Actualizar nombre
-                if (sidebarUserName) {
-                    sidebarUserName.textContent = userData.nombreCompleto || 'Usuario';
-                }
-                
-                // Actualizar iniciales
-                if (sidebarUserInitials) {
-                    const initials = getInitials(userData.nombreCompleto);
-                    sidebarUserInitials.textContent = initials;
-                }
-                
-                // Agregar evento de logout
-                if (sidebarLogoutButton) {
-                    sidebarLogoutButton.onclick = handleLogout;
-                }
-            }
-        }
-        
-        // Obtener iniciales del nombre
-        function getInitials(nombreCompleto) {
-            if (!nombreCompleto) return '?';
-            const words = nombreCompleto.trim().split(' ');
-            if (words.length === 1) {
-                return words[0].substring(0, 2).toUpperCase();
-            }
-            return (words[0][0] + words[words.length - 1][0]).toUpperCase();
-        }
-        
-        // Manejar cierre de sesi�n
-        function handleLogout() {
-            if (confirm('�Est�s seguro de que quieres cerrar sesi�n?')) {
-                localStorage.removeItem('userData');
-                localStorage.removeItem('authToken');
-                localStorage.removeItem('loginTime');
-                window.location.href = '../pages/login.html';
-            }
-        }
     </script>
-    
-    <!-- Scripts -->
     <script src="../controllers/sidebar.js"></script>
+    <script src="../controllers/officialNews.js"></script>
     <script src="../controllers/feed.js"></script>
 
 </body>

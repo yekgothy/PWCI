@@ -3,54 +3,336 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ejemplo de Uso - API Middleware</title>
+    <title>Demo Middleware - API Client</title>
     <script src="https://cdn.tailwindcss.com?v=3.4.1"></script>
 </head>
 <body class="bg-gray-900 text-white p-8">
-    
-        
-        <!-- Estado de Sesión -->
-        <div class="bg-gray-800 p-6 rounded-lg">
-            <h2 class="text-2xl font-semibold mb-4">Estado de Sesión</h2>
-            <div id="sessionStatus"></div>
-            <button onclick="showSession()" class="mt-4 px-6 py-2 bg-gray-600 hover:bg-gray-700 rounded">Actualizar</button>
-            <button onclick="AuthAPI.logout()" class="mt-4 px-6 py-2 bg-red-600 hover:bg-red-700 rounded ml-2">Cerrar Sesión</button>
-        </div>
-    </div>
-    
-    <!-- Cargar el cliente API -->
-    <script src="../controllers/api-client.js"></script>
-    
-    <script>
-        // Mostrar estado de sesión al cargar
-        window.addEventListener('DOMContentLoaded', showSession);
-        
-        
-        
-        // Mostrar estado de sesión
-        function showSession() {
-            const token = localStorage.getItem('authToken');
-            const userData = localStorage.getItem('userData');
-            const loginTime = localStorage.getItem('loginTime');
-            
-            const isAuth = token !== null;
-            const user = userData ? JSON.parse(userData) : null;
-            
-            const statusDiv = document.getElementById('sessionStatus');
-            statusDiv.innerHTML = `
-                <div class="space-y-2 text-sm">
-                    <p><strong>Autenticado:</strong> ${isAuth ? '? Sí' : '? No'}</p>
-                    ${user ? `
-                        <p><strong>Usuario:</strong> ${user.nombreCompleto}</p>
-                        <p><strong>Email:</strong> ${user.correoElectronico}</p>
-                        <p><strong>Rol:</strong> ${user.rol}</p>
-                        <p><strong>ID:</strong> ${user.idUsuario}</p>
-                    ` : ''}
-                    <p><strong>Token:</strong> ${token ? token.substring(0, 20) + '...' : 'Ninguno'}</p>
-                    ${loginTime ? `<p><strong>Login:</strong> ${new Date(loginTime).toLocaleString()}</p>` : ''}
+    <div class="max-w-5xl mx-auto space-y-8">
+        <section class="bg-gray-800/60 border border-gray-700 rounded-xl p-6 space-y-4">
+            <h1 class="text-3xl font-semibold">Middleware de API con Fetch</h1>
+            <p class="text-sm text-gray-300 leading-relaxed">
+                Esta vista prueba el cliente centralizado <code>api-client.js</code>. El middleware adjunta el token en cada petici&oacute;n,
+                gestiona respuestas de error comunes y expone utilidades como <code>AuthAPI</code>. Usa los formularios de abajo para iniciar sesi&oacute;n y disparar peticiones autenticadas o p&uacute;blicas.
+            </p>
+        </section>
+
+        <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-4">
+            <div class="flex items-center justify-between gap-3">
+                <h2 class="text-xl font-semibold">Estado de sesi&oacute;n</h2>
+                <div class="flex gap-2">
+                    <button id="refreshSessionBtn" class="px-4 py-2 bg-gray-700 hover:bg-gray-600 rounded transition">Actualizar</button>
+                    <button id="forceLogoutBtn" class="px-4 py-2 bg-red-600 hover:bg-red-500 rounded transition">Limpiar sesi&oacute;n</button>
                 </div>
-            `;
+            </div>
+            <div id="sessionStatus" class="text-sm text-gray-200">Sin datos de sesi&oacute;n.</div>
+        </section>
+
+        <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-4">
+            <h2 class="text-xl font-semibold">Inicio de sesi&oacute;n r&aacute;pido</h2>
+            <form id="loginForm" class="space-y-4">
+                <div class="grid gap-4 md:grid-cols-2">
+                    <label class="text-sm font-medium text-gray-300">
+                        Correo electr&oacute;nico
+                        <input id="loginEmail" type="email" class="mt-1 w-full px-3 py-2 rounded bg-gray-900 border border-gray-700 focus:border-emerald-400 focus:ring-emerald-400 outline-none" value="admin@admin.worldcup" autocomplete="email">
+                    </label>
+                    <label class="text-sm font-medium text-gray-300">
+                        Contrase&ntilde;a
+                        <input id="loginPassword" type="password" class="mt-1 w-full px-3 py-2 rounded bg-gray-900 border border-gray-700 focus:border-emerald-400 focus:ring-emerald-400 outline-none" value="admin123" autocomplete="current-password">
+                    </label>
+                </div>
+                <div class="flex flex-wrap items-center gap-3">
+                    <button type="submit" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded transition">Iniciar sesi&oacute;n</button>
+                    <span id="loginFeedback" class="text-sm text-gray-300"></span>
+                </div>
+            </form>
+        </section>
+
+        <section class="bg-gray-800 border border-gray-700 rounded-xl p-6 space-y-4">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <h2 class="text-xl font-semibold">Probar middleware</h2>
+                <p class="text-xs text-gray-400">Las peticiones usan <code>api.fetch()</code> con el token configurado en localStorage.</p>
+            </div>
+            <form id="requestForm" class="space-y-4">
+                <div class="grid gap-3 md:grid-cols-2">
+                    <label class="text-sm font-medium text-gray-300">
+                        Endpoint
+                        <select id="endpointSelector" class="mt-1 w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded focus:border-emerald-400 focus:ring-emerald-400 outline-none">
+                            <option value="/publicaciones" data-method="GET">GET /publicaciones (p&uacute;blico)</option>
+                            <option value="/usuarios" data-method="GET">GET /usuarios (requiere admin)</option>
+                            <option value="/comentarios/1" data-method="GET">GET /comentarios/1 (autenticado)</option>
+                            <option value="/auth/login" data-method="POST" data-body='{"correoElectronico":"admin@admin.worldcup","contrasena":"admin123"}'>POST /auth/login (credenciales demo)</option>
+                            <option value="/externo/fifa/noticias" data-method="GET">GET /externo/fifa/noticias (API externa)</option>
+                        </select>
+                    </label>
+                    <label class="text-sm font-medium text-gray-300">
+                        M&eacute;todo
+                        <select id="methodSelector" class="mt-1 w-full px-3 py-2 bg-gray-900 border border-gray-700 rounded focus:border-emerald-400 focus:ring-emerald-400 outline-none">
+                            <option value="GET" selected>GET</option>
+                            <option value="POST">POST</option>
+                            <option value="PUT">PUT</option>
+                            <option value="DELETE">DELETE</option>
+                        </select>
+                    </label>
+                </div>
+                <label class="text-sm font-medium text-gray-300 block">
+                    Payload JSON (opcional)
+                    <textarea id="payloadInput" class="mt-1 w-full min-h-[140px] px-3 py-2 rounded bg-gray-900 border border-gray-700 focus:border-emerald-400 focus:ring-emerald-400 outline-none font-mono text-sm" placeholder="{ }"></textarea>
+                </label>
+                <div class="flex flex-wrap items-center gap-3">
+                    <button type="submit" class="px-5 py-2 bg-emerald-500 hover:bg-emerald-400 text-black font-semibold rounded transition">Enviar petici&oacute;n</button>
+                    <button type="button" id="clearLogBtn" class="px-5 py-2 bg-gray-700 hover:bg-gray-600 rounded transition">Limpiar bit&aacute;cora</button>
+                    <span id="requestStatus" class="text-sm text-gray-300"></span>
+                </div>
+            </form>
+            <pre id="logOutput" class="bg-gray-950 border border-gray-800 rounded-lg p-4 text-sm overflow-x-auto whitespace-pre-wrap min-h-[180px]">No hay peticiones a&uacute;n.</pre>
+        </section>
+    </div>
+
+    <script src="../controllers/api-client.js"></script>
+    <script>
+    (function() {
+        const sessionStatusEl = document.getElementById('sessionStatus');
+        const refreshSessionBtn = document.getElementById('refreshSessionBtn');
+        const forceLogoutBtn = document.getElementById('forceLogoutBtn');
+        const loginForm = document.getElementById('loginForm');
+        const loginEmail = document.getElementById('loginEmail');
+        const loginPassword = document.getElementById('loginPassword');
+        const loginFeedback = document.getElementById('loginFeedback');
+        const requestForm = document.getElementById('requestForm');
+        const endpointSelector = document.getElementById('endpointSelector');
+        const methodSelector = document.getElementById('methodSelector');
+        const payloadInput = document.getElementById('payloadInput');
+        const clearLogBtn = document.getElementById('clearLogBtn');
+        const requestStatus = document.getElementById('requestStatus');
+        const logOutput = document.getElementById('logOutput');
+        const emptyLogMessage = 'No hay peticiones a\u00fan.';
+
+        function showSession() {
+            const token = window.localStorage.getItem('authToken');
+            const userDataRaw = window.localStorage.getItem('userData');
+            const loginTime = window.localStorage.getItem('loginTime');
+
+            let userData = null;
+            if (userDataRaw) {
+                try {
+                    userData = JSON.parse(userDataRaw);
+                } catch (error) {
+                    console.warn('Error parseando userData:', error);
+                }
+            }
+
+            const parts = [];
+            parts.push(`<p><strong>Autenticado:</strong> ${token ? 'S&iacute;' : 'No'}</p>`);
+            if (userData) {
+                parts.push(`<p><strong>Usuario:</strong> ${userData.nombreCompleto || 'Sin nombre'}</p>`);
+                parts.push(`<p><strong>Email:</strong> ${userData.correoElectronico || '-'}</p>`);
+                parts.push(`<p><strong>Rol:</strong> ${userData.rol || '-'}</p>`);
+                if (userData.idUsuario) {
+                    parts.push(`<p><strong>ID:</strong> ${userData.idUsuario}</p>`);
+                }
+            }
+            parts.push(`<p><strong>Token:</strong> ${token ? token.substring(0, 20) + '...' : 'Ninguno'}</p>`);
+            if (loginTime) {
+                parts.push(`<p><strong>Inicio de sesi&oacute;n:</strong> ${new Date(loginTime).toLocaleString()}</p>`);
+            }
+
+            sessionStatusEl.innerHTML = `<div class="space-y-1 text-sm text-gray-200">${parts.join('')}</div>`;
         }
+
+        function setLoginFeedback(message, variant) {
+            if (!loginFeedback) {
+                return;
+            }
+            loginFeedback.textContent = message || '';
+            loginFeedback.className = 'text-sm';
+            if (!message) {
+                return;
+            }
+            if (variant === 'success') {
+                loginFeedback.classList.add('text-emerald-400');
+            } else if (variant === 'error') {
+                loginFeedback.classList.add('text-red-400');
+            } else {
+                loginFeedback.classList.add('text-gray-300');
+            }
+        }
+
+        function setRequestStatus(message, variant) {
+            if (!requestStatus) {
+                return;
+            }
+            requestStatus.textContent = message || '';
+            requestStatus.className = 'text-sm';
+            if (!message) {
+                return;
+            }
+            if (variant === 'success') {
+                requestStatus.classList.add('text-emerald-400');
+            } else if (variant === 'error') {
+                requestStatus.classList.add('text-red-400');
+            } else {
+                requestStatus.classList.add('text-gray-300');
+            }
+        }
+
+        function appendLogEntry(content) {
+            const timestamp = new Date().toLocaleTimeString();
+            const formatted = `[${timestamp}] ${content}`;
+            const previous = logOutput.textContent === emptyLogMessage ? '' : logOutput.textContent + '\n\n';
+            logOutput.textContent = previous + formatted;
+        }
+
+        function clearLog() {
+            logOutput.textContent = emptyLogMessage;
+        }
+
+        function resetPayloadIfNeeded() {
+            if (!endpointSelector || !methodSelector || !payloadInput) {
+                return;
+            }
+            const option = endpointSelector.options[endpointSelector.selectedIndex];
+            if (!option) {
+                return;
+            }
+            const suggestedMethod = option.dataset.method;
+            const suggestedBody = option.dataset.body;
+
+            if (suggestedMethod) {
+                methodSelector.value = suggestedMethod.toUpperCase();
+            }
+
+            if (suggestedBody) {
+                try {
+                    const parsed = JSON.parse(suggestedBody);
+                    payloadInput.value = JSON.stringify(parsed, null, 2);
+                } catch (error) {
+                    payloadInput.value = suggestedBody;
+                }
+            } else if (methodSelector.value === 'GET' || methodSelector.value === 'DELETE') {
+                payloadInput.value = '';
+            }
+        }
+
+        async function handleLogin(event) {
+            event.preventDefault();
+            const email = (loginEmail.value || '').trim();
+            const password = loginPassword.value || '';
+
+            if (!email || !password) {
+                setLoginFeedback('Completa correo y contrase\u00f1a.', 'error');
+                return;
+            }
+
+            setLoginFeedback('Enviando credenciales...', 'info');
+            try {
+                const response = await AuthAPI.login(email, password);
+                const userName = response?.data?.user?.nombreCompleto || 'Usuario';
+                setLoginFeedback(`Ses\u00f3n iniciada como ${userName}.`, 'success');
+                appendLogEntry(`Login OK - se almacen\u00f3 token JWT. Rol: ${response?.data?.user?.rol || 'desconocido'}`);
+                showSession();
+            } catch (error) {
+                const message = error instanceof APIError ? `${error.message} (status ${error.status})` : (error.message || 'Error desconocido');
+                setLoginFeedback(message, 'error');
+                appendLogEntry(`Login ERROR - ${message}`);
+            }
+        }
+
+        function handleForceLogout() {
+            window.localStorage.removeItem('authToken');
+            window.localStorage.removeItem('userData');
+            window.localStorage.removeItem('loginTime');
+            setLoginFeedback('Sesi\u00f3n eliminada localmente.', 'info');
+            appendLogEntry('Logout local - se limpiaron los datos.');
+            showSession();
+        }
+
+        async function handleRequest(event) {
+            event.preventDefault();
+            if (!endpointSelector || !methodSelector) {
+                setRequestStatus('Formulario incompleto.', 'error');
+                return;
+            }
+
+            const endpoint = (endpointSelector.value || '').trim();
+            const method = (methodSelector.value || 'GET').toUpperCase();
+            const payloadText = payloadInput ? payloadInput.value.trim() : '';
+            const options = { method };
+
+            if (!endpoint) {
+                setRequestStatus('Selecciona un endpoint.', 'error');
+                return;
+            }
+
+            if (payloadText) {
+                try {
+                    const jsonPayload = JSON.parse(payloadText);
+                    options.body = JSON.stringify(jsonPayload);
+                } catch (error) {
+                    setRequestStatus('Payload JSON inv\u00e1lido.', 'error');
+                    return;
+                }
+            } else if (method !== 'GET' && method !== 'DELETE') {
+                options.body = JSON.stringify({});
+            }
+
+            setRequestStatus('Llamando al API...', 'info');
+            const start = window.performance.now();
+
+            try {
+                const data = await api.fetch(endpoint, options);
+                const elapsed = Math.round(window.performance.now() - start);
+                appendLogEntry(`${method} ${endpoint} - OK (${elapsed} ms)\nRespuesta: ${JSON.stringify(data, null, 2)}`);
+                setRequestStatus(`Respuesta OK en ${elapsed} ms.`, 'success');
+            } catch (error) {
+                const elapsed = Math.round(window.performance.now() - start);
+                if (error instanceof APIError) {
+                    const payload = error.data ? JSON.stringify(error.data, null, 2) : 'null';
+                    appendLogEntry(`${method} ${endpoint} - ERROR ${error.status} (${elapsed} ms)\nMensaje: ${error.message}\nPayload: ${payload}`);
+                    setRequestStatus(`APIError ${error.status} en ${elapsed} ms.`, 'error');
+                } else {
+                    appendLogEntry(`${method} ${endpoint} - ERROR (${elapsed} ms)\nMensaje: ${error.message || 'Error desconocido'}`);
+                    setRequestStatus(`Fallo inesperado en ${elapsed} ms.`, 'error');
+                }
+            } finally {
+                showSession();
+            }
+        }
+
+        function init() {
+            showSession();
+            resetPayloadIfNeeded();
+        }
+
+        if (document.readyState === 'loading') {
+            window.addEventListener('DOMContentLoaded', init);
+        } else {
+            init();
+        }
+
+        if (refreshSessionBtn) {
+            refreshSessionBtn.addEventListener('click', showSession);
+        }
+
+        if (forceLogoutBtn) {
+            forceLogoutBtn.addEventListener('click', handleForceLogout);
+        }
+
+        if (loginForm) {
+            loginForm.addEventListener('submit', handleLogin);
+        }
+
+        if (endpointSelector) {
+            endpointSelector.addEventListener('change', resetPayloadIfNeeded);
+        }
+
+        if (requestForm) {
+            requestForm.addEventListener('submit', handleRequest);
+        }
+
+        if (clearLogBtn) {
+            clearLogBtn.addEventListener('click', clearLog);
+        }
+    })();
     </script>
 </body>
 </html>

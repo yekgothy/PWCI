@@ -223,20 +223,26 @@ function renderRecentPosts(posts) {
         return;
     }
     
-    container.innerHTML = posts.map(post => `
+    container.innerHTML = posts.map(post => {
+        const autorNombre = post.nombreAutor || post.nombreCompleto || 'Usuario';
+        const fecha = post.fechaPublicacion || post.fechaAprobacion;
+        const initials = getInitials(autorNombre);
+
+        return `
         <div class="flex items-start space-x-3 py-3 border-b border-neutral-100 last:border-0">
             <div class="w-10 h-10 bg-neutral-200 rounded-full flex-shrink-0 flex items-center justify-center">
-                <span class="text-sm font-semibold text-neutral-600">${getInitials(post.nombreCompleto)}</span>
+                <span class="text-sm font-semibold text-neutral-600">${initials}</span>
             </div>
             <div class="flex-1 min-w-0">
                 <p class="text-sm font-medium text-neutral-900 truncate">${post.titulo}</p>
-                <p class="text-xs text-neutral-500">${post.nombreCompleto || 'Usuario'} • ${formatDate(post.fechaPublicacion)}</p>
+                <p class="text-xs text-neutral-500">${autorNombre} • ${formatDate(fecha)}</p>
             </div>
-            <a href="approvePost.html" class="text-xs text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap">
+            <a href="approvePost.html?id=${post.idPublicacion}" class="text-xs text-blue-600 hover:text-blue-700 font-medium whitespace-nowrap">
                 Revisar →
             </a>
         </div>
-    `).join('');
+        `;
+    }).join('');
 }
 
 /**
@@ -244,7 +250,7 @@ function renderRecentPosts(posts) {
  */
 function getInitials(nombreCompleto) {
     if (!nombreCompleto) return '??';
-    const words = nombreCompleto.trim().split(' ');
+    const words = nombreCompleto.trim().split(/\s+/);
     if (words.length === 1) return words[0].substring(0, 2).toUpperCase();
     return (words[0][0] + words[words.length - 1][0]).toUpperCase();
 }

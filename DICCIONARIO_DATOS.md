@@ -29,18 +29,25 @@ Sistema de gestión de publicaciones sobre Copas del Mundo FIFA con registro de 
 |-------|--------------|------|-------|---------|-------------|
 | `idUsuario` | INT(11) | NO | PRI (AI) | - | Identificador único del usuario |
 | `nombreCompleto` | VARCHAR(100) | NO | - | - | Nombre y apellido(s) del usuario |
+| `fechaNacimiento` | DATE | NO | - | - | Fecha de nacimiento (validación: mayor a 12 años) |
+| `genero` | VARCHAR(20) | YES | - | NULL | Género declarado por el usuario |
+| `paisNacimiento` | VARCHAR(50) | YES | - | NULL | País de nacimiento del usuario |
+| `nacionalidad` | VARCHAR(50) | YES | - | NULL | Nacionalidad principal del usuario |
 | `correoElectronico` | VARCHAR(100) | NO | UNI | - | Email único del usuario (usado para login) |
 | `contrasena` | VARCHAR(255) | NO | - | - | Contraseña hasheada con password_hash() |
-| `fechaNacimiento` | DATE | NO | - | - | Fecha de nacimiento (validación: mayor a 12 años) |
 | `foto` | VARCHAR(255) | YES | - | NULL | URL o ruta de foto de perfil del usuario |
+| `fotoBlob` | LONGBLOB | YES | - | NULL | Imagen de perfil almacenada en binario (opcional) |
+| `fotoMimeType` | VARCHAR(50) | YES | - | NULL | Tipo MIME del archivo BLOB de la foto |
+| `fotoNombre` | VARCHAR(255) | YES | - | NULL | Nombre original del archivo de la foto BLOB |
 | `rol` | ENUM('usuario','admin') | YES | - | 'usuario' | Rol del usuario en el sistema |
-| `activo` | TINYINT(1) | YES | - | 1 | Estado del usuario (1=activo, 0=inactivo) |
 | `fechaRegistro` | DATETIME | YES | - | CURRENT_TIMESTAMP | Fecha y hora de registro en el sistema |
+| `activo` | TINYINT(1) | YES | - | 1 | Estado del usuario (1=activo, 0=inactivo) |
 
 **Restricciones**:
 - PRIMARY KEY: `idUsuario`
 - UNIQUE KEY: `correoElectronico`
 - La edad debe ser mayor o igual a 12 años (validado en backend)
+- Los campos `genero`, `paisNacimiento` y `nacionalidad` son opcionales
 - El rol por defecto es 'usuario'
 - La contraseña debe hashearse con `PASSWORD_DEFAULT` de PHP
 
@@ -313,10 +320,10 @@ Sistema de gestión de publicaciones sobre Copas del Mundo FIFA con registro de 
 
 ### Autenticación y Usuarios (7 SPs)
 1. `sp_login(correoElectronico, contrasena)` - Autenticación de usuario
-2. `sp_registrar_usuario(...)` - Registro de nuevo usuario
+2. `sp_registrar_usuario(nombreCompleto, correoElectronico, contrasena, fechaNacimiento, genero, paisNacimiento, nacionalidad, foto)` - Registro de nuevo usuario
 3. `sp_obtener_usuario_por_id(idUsuario)` - Obtener datos de usuario
 4. `sp_obtener_usuario_por_email(correoElectronico)` - Buscar usuario por email
-5. `sp_actualizar_perfil_usuario(...)` - Actualizar datos de perfil
+5. `sp_actualizar_perfil_usuario(idUsuario, nombreCompleto, fechaNacimiento, genero, paisNacimiento, nacionalidad)` - Actualizar datos de perfil
 6. `sp_actualizar_foto_perfil(idUsuario, foto)` - Cambiar foto de perfil
 7. `sp_obtener_estadisticas_usuario(idUsuario)` - Obtener estadísticas del usuario
 

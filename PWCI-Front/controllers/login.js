@@ -1,6 +1,3 @@
-// Controlador de inicio de sesión
-const API_URL = 'http://localhost/PWCI/PWCI-Backend/api.php';
-
 let loginForm, emailInput, passwordInput, loginButton, errorMessage, togglePasswordBtn;
 
 document.addEventListener('DOMContentLoaded', function() {
@@ -53,30 +50,15 @@ async function handleLogin(event) {
     setLoading(true);
     
     try {
-        // Realizar petición de login
-        const response = await fetch(`${API_URL}/auth/login`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({
-                correoElectronico: email,
-                contrasena: password
-            })
-        });
-        
-        const data = await response.json();
-        
-        if (response.ok && data.status === 200) {
-            // Login exitoso
-            handleLoginSuccess(data.data);
-        } else {
-            // Error en el login
-            showError(data.message || 'Error al iniciar sesión');
-        }
+        const response = await AuthAPI.login(email, password);
+        handleLoginSuccess(response.data);
     } catch (error) {
-        console.error('Error en login:', error);
-        showError('Error de conexión. Por favor, verifica tu conexión a internet.');
+        if (error instanceof APIError) {
+            showError(error.message || 'Credenciales inválidas');
+        } else {
+            console.error('Error en login:', error);
+            showError('Error de conexión. Por favor, verifica tu conexión a internet.');
+        }
     } finally {
         setLoading(false);
     }

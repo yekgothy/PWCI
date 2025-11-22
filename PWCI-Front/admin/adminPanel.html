@@ -192,6 +192,11 @@
     </div>
 
     <!-- Scripts -->
+    <script src="../controllers/api-client.js"></script>
+    <script src="../controllers/auth.js"></script>
+    <script>protectPage(true);</script>
+    <script src="../controllers/avatar-utils.js"></script>
+    <script src="../controllers/session.js"></script>
     <script src="../controllers/adminPanel.js"></script>
     <script>
         // Cargar navbar
@@ -220,6 +225,10 @@
                                 sidebarMenu.classList.add('hidden');
                             });
                         }
+                    }
+
+                    if (window.PWCI && window.PWCI.session) {
+                        window.PWCI.session.refreshUI();
                     }
                 }, 100);
             })

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AprobaciÛn de Posts - Admin</title>
+    <title>Aprobaci√≥n de Posts - Admin</title>
     <script src="https://cdn.tailwindcss.com?v=3.4.1"></script>
 </head>
 <body class="bg-neutral-50 text-neutral-900 font-sans">
@@ -16,42 +16,74 @@
         <div class="max-w-7xl mx-auto px-4 py-8">
             
             <!-- Header -->
-            <div class="mb-8 flex items-center justify-between">
+            <div class="mb-8 flex flex-wrap items-center justify-between gap-4">
                 <div>
-                    <h1 class="text-3xl font-bold text-neutral-900 mb-2">AprobaciÛn de Publicaciones</h1>
-                    <p class="text-neutral-600">Revisa y modera las publicaciones pendientes</p>
+                    <h1 class="text-3xl font-bold text-neutral-900 mb-2">Aprobaci√≥n de publicaciones</h1>
+                    <p class="text-neutral-600">Modera el contenido enviado por la comunidad antes de que llegue al feed</p>
                 </div>
-                <a href="adminPanel.html" class="bg-neutral-200 hover:bg-neutral-300 text-neutral-700 px-4 py-2 rounded-lg transition-colors">
-                    ? Volver al Panel
+                <a href="adminPanel.html" class="inline-flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-4 py-2 text-sm font-medium text-neutral-600 transition-colors hover:bg-neutral-100">
+                    <span aria-hidden="true">&larr;</span>
+                    Volver al panel
                 </a>
             </div>
 
-            <!-- Filter Tabs -->
-            <div class="mb-6">
-                <div class="border-b border-neutral-200">
-                    <nav class="flex space-x-8">
-                        <button id="tabPendientes" data-tab="pendiente" class="py-2 px-1 border-b-2 border-blue-500 text-blue-600 font-medium hover:text-blue-700">
-                            Pendientes (0)
+            <!-- Feedback Message -->
+            <div id="feedbackMessage" class="mb-6 hidden rounded-xl border px-4 py-3 text-sm font-medium"></div>
+
+            <!-- Stats -->
+            <div class="mb-8 grid grid-cols-1 gap-6 md:grid-cols-3">
+                <div class="rounded-xl border border-neutral-200 bg-white p-6 shadow">
+                    <p class="text-sm font-semibold text-neutral-500">Pendientes por revisar</p>
+                    <p id="statPendientes" class="mt-2 text-3xl font-bold text-neutral-900">-</p>
+                    <p class="mt-1 text-xs text-neutral-400">Publicaciones en espera de decisi√≥n</p>
+                </div>
+                <div class="rounded-xl border border-neutral-200 bg-white p-6 shadow">
+                    <p class="text-sm font-semibold text-neutral-500">Aprobadas esta semana</p>
+                    <p id="statAprobadas" class="mt-2 text-3xl font-bold text-green-600">-</p>
+                    <p class="mt-1 text-xs text-neutral-400">√öltimas aprobaciones registradas</p>
+                </div>
+                <div class="rounded-xl border border-neutral-200 bg-white p-6 shadow">
+                    <p class="text-sm font-semibold text-neutral-500">Rechazadas recientes</p>
+                    <p id="statRechazadas" class="mt-2 text-3xl font-bold text-red-600">-</p>
+                    <p class="mt-1 text-xs text-neutral-400">Contenidos descartados recientemente</p>
+                </div>
+            </div>
+
+            <!-- Filters -->
+            <div class="mb-6 rounded-xl border border-neutral-200 bg-white p-5 shadow">
+                <div class="flex flex-col gap-4 md:flex-row md:items-end">
+                    <div class="flex-1">
+                        <label for="searchInput" class="block text-sm font-medium text-neutral-600">Buscar publicaciones</label>
+                        <div class="mt-2 flex items-center gap-2 rounded-lg border border-neutral-300 bg-white px-3 py-2 focus-within:ring-2 focus-within:ring-neutral-500">
+                            <svg class="h-4 w-4 text-neutral-400" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M21 21l-4.35-4.35M18 11a7 7 0 11-14 0 7 7 0 0114 0z" />
+                            </svg>
+                            <input id="searchInput" type="text" class="block w-full border-none p-0 text-sm text-neutral-700 placeholder-neutral-400 focus:outline-none" placeholder="Filtra por t√≠tulo, autor o categor√≠a">
+                        </div>
+                    </div>
+                    <div class="flex flex-wrap items-end gap-3 md:w-auto">
+                        <div>
+                            <label class="block text-sm font-medium text-neutral-600">Estado</label>
+                            <div class="mt-2 flex rounded-lg border border-neutral-300 bg-white p-1 text-sm font-medium text-neutral-600">
+                                <button id="tabPendientes" data-tab="pendiente" class="rounded-md px-4 py-2 transition-colors">Pendientes</button>
+                                <button id="tabAprobadas" data-tab="aprobada" class="rounded-md px-4 py-2 transition-colors">Aprobadas</button>
+                                <button id="tabRechazadas" data-tab="rechazada" class="rounded-md px-4 py-2 transition-colors">Rechazadas</button>
+                            </div>
+                        </div>
+                        <button id="refreshPostsBtn" class="inline-flex items-center gap-2 rounded-lg bg-neutral-900 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-neutral-800">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M20 11a8.1 8.1 0 00-15.5-2M4 13a8.1 8.1 0 0015.5 2M5 5v4h4M19 19v-4h-4" />
+                            </svg>
+                            Actualizar
                         </button>
-                        <button id="tabAprobadas" data-tab="aprobada" class="py-2 px-1 border-b-2 border-transparent text-neutral-500 hover:text-neutral-700">
-                            Aprobados (0)
-                        </button>
-                        <button id="tabRechazadas" data-tab="rechazada" class="py-2 px-1 border-b-2 border-transparent text-neutral-500 hover:text-neutral-700">
-                            Rechazados (0)
-                        </button>
-                    </nav>
+                    </div>
                 </div>
             </div>
 
             <!-- Posts List -->
-            <div id="postsContainer" class="space-y-6">
-                <!-- Los posts se cargar·n din·micamente aquÌ -->
-                <div class="bg-white rounded-xl shadow-md border border-neutral-200 p-12 text-center">
-                    <div class="animate-pulse">
-                        <div class="h-12 w-12 bg-neutral-200 rounded-full mx-auto mb-4"></div>
-                        <div class="h-4 bg-neutral-200 rounded w-1/2 mx-auto"></div>
-                    </div>
-                    <p class="text-neutral-500 mt-4">Cargando publicaciones...</p>
+            <div id="postsContainer" class="space-y-4">
+                <div class="rounded-xl border border-dashed border-neutral-300 bg-white p-8 text-center text-sm text-neutral-500">
+                    Cargando publicaciones pendientes...
                 </div>
             </div>
 
@@ -59,6 +91,11 @@
     </div>
 
     <!-- Scripts -->
+    <script src="../controllers/api-client.js"></script>
+    <script src="../controllers/auth.js"></script>
+    <script>protectPage(true);</script>
+    <script src="../controllers/avatar-utils.js"></script>
+    <script src="../controllers/session.js"></script>
     <script src="../controllers/approvePost.js"></script>
     <script>
         // Cargar navbar
@@ -87,6 +124,10 @@
                                 sidebarMenu.classList.add('hidden');
                             });
                         }
+                    }
+
+                    if (window.PWCI && window.PWCI.session) {
+                        window.PWCI.session.refreshUI();
                     }
                 }, 100);
             })

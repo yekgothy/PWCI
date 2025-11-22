@@ -144,6 +144,7 @@ function initializeFormEvents() {
     const contentTextarea = document.getElementById('content');
     const charCounter = document.getElementById('charCounter');
     const imageInfo = document.getElementById('imageInfo');
+    const charRemaining = document.getElementById('charCountRemaining');
 
     // Evento de submit del formulario
     if (form) {
@@ -202,15 +203,21 @@ function initializeFormEvents() {
             const length = e.target.value.length;
             const maxLength = 2000;
             const remaining = maxLength - length;
-            
-            charCounter.textContent = `${remaining} caracteres restantes`;
-            
-            if (remaining < 100) {
-                charCounter.classList.add('text-red-500');
-                charCounter.classList.remove('text-neutral-500');
+
+            if (charRemaining) {
+                charRemaining.textContent = `${remaining} caracteres restantes`;
             } else {
-                charCounter.classList.remove('text-red-500');
-                charCounter.classList.add('text-neutral-500');
+                charCounter.textContent = `${remaining} caracteres restantes`;
+            }
+
+            const targetElement = charRemaining || charCounter;
+
+            if (remaining < 100) {
+                targetElement.classList.add('text-red-500');
+                targetElement.classList.remove('text-neutral-500', 'text-neutral-500/80');
+            } else {
+                targetElement.classList.remove('text-red-500');
+                targetElement.classList.add('text-neutral-500');
             }
         });
     }

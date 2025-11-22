@@ -20,6 +20,7 @@ class Usuario {
     public $paisNacimiento;
     public $nacionalidad;
     public $foto;
+    public $tieneFotoBlob;
     public $rol;
     public $activo;
     public $fechaRegistro;
@@ -41,6 +42,9 @@ class Usuario {
             $this->correoElectronico,
             $this->contrasena,
             $this->fechaNacimiento,
+            $this->genero,
+            $this->paisNacimiento,
+            $this->nacionalidad,
             $this->foto
         ]);
     }
@@ -90,11 +94,14 @@ class Usuario {
      * @param string $fechaNacimiento
      * @return bool
      */
-    public function actualizarPerfil($id, $nombreCompleto, $fechaNacimiento) {
+    public function actualizarPerfil($id, $nombreCompleto = null, $fechaNacimiento = null, $genero = null, $paisNacimiento = null, $nacionalidad = null) {
         return $this->db->executeProcedure('sp_actualizar_perfil_usuario', [
             $id,
             $nombreCompleto,
-            $fechaNacimiento
+            $fechaNacimiento,
+            $genero,
+            $paisNacimiento,
+            $nacionalidad
         ]);
     }
     

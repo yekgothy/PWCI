@@ -252,6 +252,8 @@
             </div>
         </footer>    </main>
 
+    <script src="../controllers/avatar-utils.js"></script>
+    <script src="../controllers/session.js"></script>
     <script src="../controllers/navbar.js"></script>
     <script src="../controllers/home.js"></script>
 
@@ -267,6 +269,9 @@
                     const navbar = document.getElementById('mainNavbar');
                     if (navbar) {
                         navbar.classList.remove('md:hidden');
+                    }
+                    if (window.PWCI && window.PWCI.session) {
+                        window.PWCI.session.refreshUI();
                     }
                 }, 100);
             });
