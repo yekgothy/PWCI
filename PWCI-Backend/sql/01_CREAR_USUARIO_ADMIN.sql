@@ -3,7 +3,7 @@
 -- World Cup Hub - Sistema de Administración
 -- =====================================================
 -- EJECUTAR ESTE ARCHIVO DESPUÉS DE CREAR LA BASE DE DATOS
--- Contraseña del admin: admin123
+-- Contraseña del admin: password1
 -- =====================================================
 
 USE BDM;
@@ -31,7 +31,7 @@ INSERT INTO Usuario (
     'México',
     'Mexicana',
     'admin@worldcuphub.com',
-    '$2y$10$YourHashedPasswordHere',  -- Contraseña: admin123 (debes hashearla)
+    '$2y$10$q3IJwvQXvHby3GhL3VEje.OudeVATracShi1JYM/nhP.uHET1ivGy',  -- Contraseña: password1
     NULL,
     'admin',
     TRUE,
