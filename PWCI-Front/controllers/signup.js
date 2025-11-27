@@ -121,6 +121,15 @@ async function handleSignup(event) {
             nacionalidad: nacionalidad || null
         };
 
+        // Realizar el registro usando el helper de autenticación
+        const response = await AuthAPI.register(payload);
+
+        // Normalizar la respuesta (el backend devuelve { status, message, data })
+        const responseData = response && response.data ? response.data : response;
+
+        // Si el registro es exitoso
+        handleSignupSuccess(responseData);
+    } catch (error) {
         if (error instanceof APIError) {
             showError(error.message || 'No se pudo completar el registro');
         } else {
@@ -200,7 +209,16 @@ function validateForm({ nombre, apellido, nombreCompleto, email, password, fecha
     return null;
 }
 
+/**
+ * Validar que todas las referencias del formulario existan
+ */
 function validateFormReferences() {
+    if (!emailInput || !passwordInput) {
+        showError('Error en el formulario. Por favor, recarga la página.');
+        return false;
+    }
+    return true;
+}
 
 /**
  * Validar formato de email
